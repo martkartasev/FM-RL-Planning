@@ -27,7 +27,7 @@ public class AgentTrainer : Agent
     /// </summary>
     public override void OnEpisodeBegin()
     {
-        m_chain.Restart(Vector3.zero, Quaternion.Euler(Vector3.zero));
+        m_chain.Restart(transform.parent.TransformPoint(Vector3.zero), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
 
         target.GetComponent<TargetPositionRandomizer>().Randomize();
         targetPosition.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(transform);
@@ -133,55 +133,30 @@ public class AgentTrainer : Agent
         var continuousActions = actionBuffers.ContinuousActions;
         var i = -1;
 
-        m_chain.spine.SetDriveTarget(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveTarget(m_chain.spine.xDrive, continuousActions[++i]));
-        m_chain.spine.SetDriveTarget(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveTarget(m_chain.spine.yDrive, continuousActions[++i]));
-        m_chain.spine.SetDriveTarget(ArticulationDriveAxis.Z, m_chain.ComputeNormalizedDriveTarget(m_chain.spine.zDrive, continuousActions[++i]));
+        m_chain.DriveControllers[m_chain.spine].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.head].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
 
-        m_chain.spine.SetDriveTarget(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveTarget(m_chain.spine.xDrive, continuousActions[++i]));
-        m_chain.spine.SetDriveTarget(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveTarget(m_chain.spine.yDrive, continuousActions[++i]));
-        m_chain.spine.SetDriveTarget(ArticulationDriveAxis.Z, m_chain.ComputeNormalizedDriveTarget(m_chain.spine.zDrive, continuousActions[++i]));
+        m_chain.DriveControllers[m_chain.armL].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.forearmL].SetDriveTargets(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.handL].SetDriveTargets(0, continuousActions[++i], 0);
 
-        m_chain.head.SetDriveTarget(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveTarget(m_chain.head.xDrive, continuousActions[++i]));
-        m_chain.head.SetDriveTarget(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveTarget(m_chain.head.yDrive, continuousActions[++i]));
+        m_chain.DriveControllers[m_chain.armR].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.forearmR].SetDriveTargets(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.handR].SetDriveTargets(0, continuousActions[++i], 0);
 
-        m_chain.armL.SetDriveTarget(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveTarget(m_chain.armL.xDrive, continuousActions[++i]));
-        m_chain.armL.SetDriveTarget(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveTarget(m_chain.armL.yDrive, continuousActions[++i]));
-
-        m_chain.forearmL.SetDriveTarget(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveTarget(m_chain.forearmL.xDrive, continuousActions[++i]));
-
-        m_chain.handL.SetDriveTarget(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveTarget(m_chain.handL.yDrive, continuousActions[++i]));
-
-        m_chain.armR.SetDriveTarget(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveTarget(m_chain.armR.xDrive, continuousActions[++i]));
-        m_chain.armR.SetDriveTarget(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveTarget(m_chain.armR.yDrive, continuousActions[++i]));
-
-        m_chain.forearmR.SetDriveTarget(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveTarget(m_chain.forearmR.xDrive, continuousActions[++i]));
-
-        m_chain.handR.SetDriveTarget(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveTarget(m_chain.handR.yDrive, continuousActions[++i]));
 
         ////// Drive forces / strengths
-        m_chain.spine.SetDriveForceLimit(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveStrength(m_chain.spine.xDrive, continuousActions[++i]));
-        m_chain.spine.SetDriveForceLimit(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveStrength(m_chain.spine.yDrive, continuousActions[++i]));
-        m_chain.spine.SetDriveForceLimit(ArticulationDriveAxis.Z, m_chain.ComputeNormalizedDriveStrength(m_chain.spine.zDrive, continuousActions[++i]));
+        m_chain.DriveControllers[m_chain.spine].SetDriveStrength(continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.chest].SetDriveStrength(continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.head].SetDriveStrength(continuousActions[++i]);
 
-        m_chain.spine.SetDriveForceLimit(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveStrength(m_chain.spine.xDrive, continuousActions[++i]));
-        m_chain.spine.SetDriveForceLimit(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveStrength(m_chain.spine.yDrive, continuousActions[++i]));
-        m_chain.spine.SetDriveForceLimit(ArticulationDriveAxis.Z, m_chain.ComputeNormalizedDriveStrength(m_chain.spine.zDrive, continuousActions[++i]));
+        m_chain.DriveControllers[m_chain.armL].SetDriveStrength(continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.forearmL].SetDriveStrength(continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.handL].SetDriveStrength(continuousActions[++i]);
 
-        m_chain.head.SetDriveForceLimit(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveStrength(m_chain.head.xDrive, continuousActions[++i]));
-        m_chain.head.SetDriveForceLimit(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveStrength(m_chain.head.yDrive, continuousActions[++i]));
-
-        m_chain.armL.SetDriveForceLimit(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveStrength(m_chain.armL.xDrive, continuousActions[++i]));
-        m_chain.armL.SetDriveForceLimit(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveStrength(m_chain.armL.yDrive, continuousActions[++i]));
-
-        m_chain.forearmL.SetDriveForceLimit(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveStrength(m_chain.forearmL.xDrive, continuousActions[++i]));
-
-        m_chain.handL.SetDriveForceLimit(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveStrength(m_chain.handL.yDrive, continuousActions[++i]));
-
-        m_chain.armR.SetDriveForceLimit(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveStrength(m_chain.armR.xDrive, continuousActions[++i]));
-        m_chain.armR.SetDriveForceLimit(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveStrength(m_chain.armR.yDrive, continuousActions[++i]));
-
-        m_chain.forearmR.SetDriveForceLimit(ArticulationDriveAxis.X, m_chain.ComputeNormalizedDriveStrength(m_chain.forearmR.xDrive, continuousActions[++i]));
-
-        m_chain.handR.SetDriveForceLimit(ArticulationDriveAxis.Y, m_chain.ComputeNormalizedDriveStrength(m_chain.handR.yDrive, continuousActions[++i]));
+        m_chain.DriveControllers[m_chain.armR].SetDriveStrength(continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.forearmR].SetDriveStrength(continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.handR].SetDriveStrength(continuousActions[++i]);
     }
 }

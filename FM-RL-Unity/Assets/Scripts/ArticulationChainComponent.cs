@@ -6,7 +6,7 @@ using UnityEngine;
 public class ArticulationChainComponent : MonoBehaviour
 {
     public List<ArticulationBody> bodyParts;
-    public Dictionary<ArticulationDrive, DriveParameters> driveParameters;
+    public Dictionary<ArticulationBody, DriveController> DriveControllers;
     public ArticulationBody hips;
     public ArticulationBody spine;
     public ArticulationBody chest;
@@ -34,13 +34,8 @@ public class ArticulationChainComponent : MonoBehaviour
         bodyParts.Add(handR);
 
 
-        var valueTuples = bodyParts.SelectMany(bp => new List<(ArticulationDrive, DriveParameters)>()
-        {
-            (bp.xDrive, DriveParameters.CreateParameters(bp.xDrive)),
-            (bp.yDrive, DriveParameters.CreateParameters(bp.yDrive)),
-            (bp.zDrive, DriveParameters.CreateParameters(bp.zDrive))
-        });
-        driveParameters = valueTuples.ToDictionary(tuple => tuple.Item1, tuple => tuple.Item2);
+        DriveControllers = bodyParts.Select(bp => (bp, new DriveController(bp)))
+            .ToDictionary(tuple => tuple.bp, tuple => tuple.Item2);
     }
 
 
@@ -48,31 +43,84 @@ public class ArticulationChainComponent : MonoBehaviour
     {
         bodyParts[0].TeleportRoot(position, rotation);
 
-        foreach (var bodyPart in bodyParts)
+        foreach (var bodyPart in DriveControllers.Values)
         {
-            ResetArticulationBody(bodyPart);
+            bodyPart.ResetArticulationBody();
         }
     }
 
-    private static void ResetArticulationBody(ArticulationBody bodyPart)
+    public class DriveController
     {
-        bodyPart.jointPosition = new ArticulationReducedSpace(0f);
-        bodyPart.jointForce = new ArticulationReducedSpace(0f);
-        bodyPart.jointVelocity = new ArticulationReducedSpace(0f);
-    }
+        public DriveParameters XParameters;
+        public DriveParameters YParameters;
+        public DriveParameters ZParameters;
+        public readonly ArticulationBody articulationBody;
 
-    public float ComputeNormalizedDriveTarget(ArticulationDrive drive, float actionValue)
-    {
-        return drive.lowerLimit + (actionValue + 1) / 2 * (drive.upperLimit - drive.lowerLimit);
-    }
+        public DriveController(ArticulationBody articulationBody)
+        {
+            this.articulationBody = articulationBody;
+            XParameters = DriveParameters.CreateParameters(articulationBody.xDrive);
+            YParameters = DriveParameters.CreateParameters(articulationBody.yDrive);
+            ZParameters = DriveParameters.CreateParameters(articulationBody.zDrive);
+        }
 
-    public float ComputeNormalizedDriveStrength(ArticulationDrive drive, float actionValue)
-    {
-        return (actionValue + 1f) * 0.5f * driveParameters[drive].forceLimit;
+        public void SetDriveTargets(float x, float y, float z)
+        {
+            articulationBody.SetDriveTarget(ArticulationDriveAxis.X, ComputeNormalizedDriveTarget(XParameters, x));
+            articulationBody.SetDriveTarget(ArticulationDriveAxis.Y, ComputeNormalizedDriveTarget(YParameters, y));
+            articulationBody.SetDriveTarget(ArticulationDriveAxis.Z, ComputeNormalizedDriveTarget(ZParameters, z));
+        }
+
+        public void ResetArticulationBody()
+        {
+            switch (articulationBody.dofCount)
+            {
+                case 1:
+                    articulationBody.jointPosition = new ArticulationReducedSpace(0f);
+                    articulationBody.jointForce = new ArticulationReducedSpace(0f);
+                    articulationBody.jointVelocity = new ArticulationReducedSpace(0f);
+                    break;
+                case 2:
+                    articulationBody.jointPosition = new ArticulationReducedSpace(0f, 0f);
+                    articulationBody.jointForce = new ArticulationReducedSpace(0f, 0f);
+                    articulationBody.jointVelocity = new ArticulationReducedSpace(0f, 0f);
+                    break;
+                case 3:
+                    articulationBody.jointPosition = new ArticulationReducedSpace(0f, 0f, 0f);
+                    articulationBody.jointForce = new ArticulationReducedSpace(0f, 0f, 0f);
+                    articulationBody.jointVelocity = new ArticulationReducedSpace(0f, 0f, 0f);
+                    break;
+            }
+        }
+
+        public void SetDriveStrength(float x)
+        {
+            SetDriveStrengths(x, x, x);
+        }
+
+        public void SetDriveStrengths(float x, float y, float z)
+        {
+            articulationBody.SetDriveForceLimit(ArticulationDriveAxis.X, ComputeNormalizedDriveStrength(XParameters, x));
+            articulationBody.SetDriveForceLimit(ArticulationDriveAxis.Y, ComputeNormalizedDriveStrength(YParameters, y));
+            articulationBody.SetDriveForceLimit(ArticulationDriveAxis.Z, ComputeNormalizedDriveStrength(ZParameters, z));
+        }
+
+
+        public float ComputeNormalizedDriveTarget(DriveParameters drive, float actionValue)
+        {
+            return drive.lowerLimit + (actionValue + 1) / 2 * (drive.upperLimit - drive.lowerLimit);
+        }
+
+        public float ComputeNormalizedDriveStrength(DriveParameters drive, float actionValue)
+        {
+            return (actionValue + 1f) * 0.5f * drive.forceLimit;
+        }
     }
 
     public struct DriveParameters
     {
+        public float upperLimit;
+        public float lowerLimit;
         public float stiffness;
         public float damping;
         public float forceLimit;
@@ -81,6 +129,8 @@ public class ArticulationChainComponent : MonoBehaviour
         {
             return new DriveParameters
             {
+                upperLimit = drive.upperLimit,
+                lowerLimit = drive.lowerLimit,
                 stiffness = drive.stiffness,
                 damping = drive.damping,
                 forceLimit = drive.forceLimit,
