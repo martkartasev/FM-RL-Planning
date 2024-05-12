@@ -96,9 +96,9 @@ public class AgentTrainer : Agent
         var dotOrient = Mathf.Max(DotOrientation(right));
         var dot = dotPosition * dotOrient;
 
-        reward += -0.1f; //Time penalty
-        reward += dot * rewarderRHand.Reward();
-        reward += dot * rewarderLHand.Reward();
+        reward += -0.01f; //Time penalty
+        reward += rewarderRHand.Reward(); //*dot
+        reward += rewarderLHand.Reward(); //*dot 
 
         reward += rewarderBox.Reward();
         reward += rewarderBoxM.Reward();
@@ -110,7 +110,7 @@ public class AgentTrainer : Agent
             reward += 10;
             targetPosition.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(transform);
         }
-
+        
         AddReward(reward);
     }
 
@@ -140,16 +140,16 @@ public class AgentTrainer : Agent
         m_chain.DriveControllers[m_chain.spine].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
         m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
         m_chain.DriveControllers[m_chain.head].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
-
+        
         m_chain.DriveControllers[m_chain.armL].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
         m_chain.DriveControllers[m_chain.forearmL].SetDriveTargets(continuousActions[++i], 0, 0);
         m_chain.DriveControllers[m_chain.handL].SetDriveTargets(0, continuousActions[++i], 0);
-
+        
         m_chain.DriveControllers[m_chain.armR].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
         m_chain.DriveControllers[m_chain.forearmR].SetDriveTargets(continuousActions[++i], 0, 0);
         m_chain.DriveControllers[m_chain.handR].SetDriveTargets(0, continuousActions[++i], 0);
 
-
+    
         ////// Drive forces / strengths
         // m_chain.DriveControllers[m_chain.spine].SetDriveStrength(continuousActions[++i]);
         // m_chain.DriveControllers[m_chain.chest].SetDriveStrength(continuousActions[++i]);
