@@ -50,16 +50,20 @@ public class AgentTrainer : Agent
         //Get velocities in the context of our orientation cube's space
         //Note: You can get these velocities in world space as well but it may not train as well.
         var hips = m_chain.root;
+
         sensor.AddObservation(hips.transform.InverseTransformDirection(bp.velocity));
         sensor.AddObservation(hips.transform.InverseTransformDirection(bp.angularVelocity));
-
-        //Get position relative to hips in the context of our orientation cube's space
-        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.transform.position - hips.transform.position));
+        sensor.AddObservation(bp.transform.localRotation);
 
         if (bp != hips)
         {
-            sensor.AddObservation(bp.transform.localRotation);
+            //Get position relative to hips in the context of our orientation cube's space
+            sensor.AddObservation(hips.transform.InverseTransformDirection(bp.transform.position - hips.transform.position));
             //sensor.AddObservation(bp.currentStrength / m_JdController.maxJointForceLimit);
+        }
+        else
+        {
+            sensor.AddObservation(hips.transform.position/8);
         }
     }
 
@@ -147,16 +151,16 @@ public class AgentTrainer : Agent
 
 
         ////// Drive forces / strengths
-        m_chain.DriveControllers[m_chain.spine].SetDriveStrength(continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.chest].SetDriveStrength(continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.head].SetDriveStrength(continuousActions[++i]);
-
-        m_chain.DriveControllers[m_chain.armL].SetDriveStrength(continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.forearmL].SetDriveStrength(continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.handL].SetDriveStrength(continuousActions[++i]);
-
-        m_chain.DriveControllers[m_chain.armR].SetDriveStrength(continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.forearmR].SetDriveStrength(continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.handR].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.spine].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.chest].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.head].SetDriveStrength(continuousActions[++i]);
+        //
+        // m_chain.DriveControllers[m_chain.armL].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.forearmL].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.handL].SetDriveStrength(continuousActions[++i]);
+        //
+        // m_chain.DriveControllers[m_chain.armR].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.forearmR].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.handR].SetDriveStrength(continuousActions[++i]);
     }
 }

@@ -462,6 +462,7 @@ GameObject:
   - component: {fileID: 4108620144836376739}
   - component: {fileID: 6548155641045407577}
   - component: {fileID: 4135013739619535865}
+  - component: {fileID: 6624193282559316472}
   m_Layer: 0
   m_Name: WalkerRagdollPlatformAB
   m_TagString: Untagged
@@ -477,7 +478,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2997132258511864805}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.07, y: 0.145, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -501,9 +502,9 @@ MonoBehaviour:
     VectorObservationSize: 163
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 26
+      m_NumContinuousActions: 16
       BranchSizes: 
-    VectorActionSize: 1a000000
+    VectorActionSize: 10000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -531,7 +532,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 500
+  MaxStep: 1000
   target: {fileID: 0}
   targetPosition: {fileID: 0}
 --- !u!114 &6548155641045407577
@@ -572,6 +573,24 @@ MonoBehaviour:
   armR: {fileID: 6469066104964268540}
   forearmR: {fileID: 6069696041058180546}
   handR: {fileID: 4965495667449515687}
+--- !u!114 &6624193282559316472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2997132258511864805}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c456f5ea594466e9e4bca5956ff8772, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
+  target: {fileID: 0}
+  targetPosition: {fileID: 0}
 --- !u!1 &3051306872276215136
 GameObject:
   m_ObjectHideFlags: 0
@@ -654,8 +673,8 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -58
-    upperLimit: 20
+    lowerLimit: -20
+    upperLimit: 58
     stiffness: 40000
     damping: 5000
     forceLimit: 20000
@@ -1141,8 +1160,8 @@ ArticulationBody:
   m_SwingZ: 1
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -40
-    upperLimit: 25
+    lowerLimit: -25
+    upperLimit: 40
     stiffness: 40000
     damping: 5000
     forceLimit: 20000
@@ -2088,9 +2107,9 @@ ArticulationBody:
   serializedVersion: 5
   m_Mass: 4
   m_ParentAnchorPosition: {x: 0.26539963, y: 0, z: 0}
-  m_ParentAnchorRotation: {x: 0.49999997, y: 0.49999997, z: 0.49999997, w: 0.49999997}
+  m_ParentAnchorRotation: {x: 0.49999997, y: -0.49999997, z: 0.49999997, w: -0.49999997}
   m_AnchorPosition: {x: -0.18, y: 0, z: 0}
-  m_AnchorRotation: {x: 0.49999997, y: 0.49999997, z: 0.49999997, w: 0.49999997}
+  m_AnchorRotation: {x: 0.49999997, y: -0.49999997, z: 0.49999997, w: -0.49999997}
   m_MatchAnchors: 1
   m_ArticulationJointType: 3
   m_LinearX: 2
