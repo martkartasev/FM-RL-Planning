@@ -35,8 +35,8 @@ public class AgentTrainer : Agent
         rewarderBox = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude);
         rewarderBoxM = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude, 0.6f);
         rewarderBoxN = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude, 0.3f);
-        rewarderLHand = new ClosenessRewarder(() => (m_chain.handL.transform.position - target.position).magnitude, 0.6f);
-        rewarderRHand = new ClosenessRewarder(() => (m_chain.handR.transform.position - target.position).magnitude, 0.6f);
+        rewarderLHand = new ClosenessRewarder(() => (m_chain.handL.transform.position - target.position).magnitude, 1.0f);
+        rewarderRHand = new ClosenessRewarder(() => (m_chain.handR.transform.position - target.position).magnitude, 1.0f);
     }
 
     /// <summary>
@@ -63,15 +63,15 @@ public class AgentTrainer : Agent
         }
         else
         {
-            sensor.AddObservation(hips.transform.position/8);
+            sensor.AddObservation(hips.transform.position / 8);
         }
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(target.transform.position));
+        sensor.AddObservation(m_chain.hips.transform.InverseTransformDirection(target.transform.position - m_chain.hips.transform.position));
         sensor.AddObservation(target.transform.localRotation);
-        sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(targetPosition.transform.position));
+        sensor.AddObservation(m_chain.hips.transform.InverseTransformDirection(targetPosition.transform.position - m_chain.hips.transform.position));
 
         foreach (var bodyPart in m_chain.bodyParts)
         {
@@ -79,9 +79,47 @@ public class AgentTrainer : Agent
         }
     }
 
-    void FixedUpdate()
+    public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        if (rewarderLHand == null || rewarderRHand == null || rewarderBox == null) return;
+        SetDriveValues(actionBuffers);
+        var reward = ComputeReward();
+        AddReward(reward);
+    }
+
+    private void SetDriveValues(ActionBuffers actionBuffers)
+    {
+        var continuousActions = actionBuffers.ContinuousActions;
+        var i = -1;
+
+        m_chain.DriveControllers[m_chain.spine].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.head].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+
+        m_chain.DriveControllers[m_chain.armL].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.forearmL].SetDriveTargets(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.handL].SetDriveTargets(0, continuousActions[++i], 0);
+
+        m_chain.DriveControllers[m_chain.armR].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.forearmR].SetDriveTargets(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.handR].SetDriveTargets(0, continuousActions[++i], 0);
+
+        ////// Drive forces / strengths
+        // m_chain.DriveControllers[m_chain.spine].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.chest].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.head].SetDriveStrength(continuousActions[++i]);
+        //
+        // m_chain.DriveControllers[m_chain.armL].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.forearmL].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.handL].SetDriveStrength(continuousActions[++i]);
+        //
+        // m_chain.DriveControllers[m_chain.armR].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.forearmR].SetDriveStrength(continuousActions[++i]);
+        // m_chain.DriveControllers[m_chain.handR].SetDriveStrength(continuousActions[++i]);
+    }
+
+    private float ComputeReward()
+    {
+        if (rewarderLHand == null || rewarderRHand == null || rewarderBox == null || MaxStep == 0) return 0.0f;
 
         var reward = 0.0f;
 
@@ -91,22 +129,23 @@ public class AgentTrainer : Agent
         var dotOrient = Mathf.Max(DotOrientation(right));
         var dot = dotPosition * dotOrient;
 
-        reward += -0.1f; //Time penalty
-        reward += rewarderRHand.Reward(); //*dot
-        reward += rewarderLHand.Reward(); //*dot 
+        reward += -1f / MaxStep; //Time penalty
+        reward += rewarderRHand.Reward() * 0.5f / MaxStep; //*dot
+        reward += rewarderLHand.Reward() * 0.5f / MaxStep; //*dot 
 
-        reward += rewarderBox.Reward();
-        reward += rewarderBoxM.Reward();
-        reward += rewarderBoxN.Reward();
+        reward += rewarderBox.Reward() / MaxStep;
+        reward += rewarderBoxM.Reward() / MaxStep;
+        reward += rewarderBoxN.Reward() / MaxStep;
 
+        reward /= 4;
 
         if ((targetPosition.position - target.position).magnitude < 0.08f)
         {
-            reward += 10;
+            // reward += 10;
             targetPosition.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(transform);
         }
-        
-        AddReward(reward);
+
+        return reward;
     }
 
     private float DotOrientation(Vector3 boxBaseVector)
@@ -125,37 +164,5 @@ public class AgentTrainer : Agent
 
         //Vector3.Dot(leftHand, boxBaseVector) * Vector3.Dot(rightHand, boxBaseVector) *
         return -Vector3.Dot(rightHand, leftHand);
-    }
-
-    public override void OnActionReceived(ActionBuffers actionBuffers)
-    {
-        var continuousActions = actionBuffers.ContinuousActions;
-        var i = -1;
-
-        m_chain.DriveControllers[m_chain.spine].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.head].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
-        
-        m_chain.DriveControllers[m_chain.armL].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
-        m_chain.DriveControllers[m_chain.forearmL].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.handL].SetDriveTargets(0, continuousActions[++i], 0);
-        
-        m_chain.DriveControllers[m_chain.armR].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
-        m_chain.DriveControllers[m_chain.forearmR].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.handR].SetDriveTargets(0, continuousActions[++i], 0);
-
-    
-        ////// Drive forces / strengths
-        // m_chain.DriveControllers[m_chain.spine].SetDriveStrength(continuousActions[++i]);
-        // m_chain.DriveControllers[m_chain.chest].SetDriveStrength(continuousActions[++i]);
-        // m_chain.DriveControllers[m_chain.head].SetDriveStrength(continuousActions[++i]);
-        //
-        // m_chain.DriveControllers[m_chain.armL].SetDriveStrength(continuousActions[++i]);
-        // m_chain.DriveControllers[m_chain.forearmL].SetDriveStrength(continuousActions[++i]);
-        // m_chain.DriveControllers[m_chain.handL].SetDriveStrength(continuousActions[++i]);
-        //
-        // m_chain.DriveControllers[m_chain.armR].SetDriveStrength(continuousActions[++i]);
-        // m_chain.DriveControllers[m_chain.forearmR].SetDriveStrength(continuousActions[++i]);
-        // m_chain.DriveControllers[m_chain.handR].SetDriveStrength(continuousActions[++i]);
     }
 }
