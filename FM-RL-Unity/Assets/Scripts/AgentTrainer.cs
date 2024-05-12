@@ -10,11 +10,11 @@ public class AgentTrainer : Agent
 
     private ArticulationChainComponent m_chain;
 
-    private ClosenessRewarder rewarderBox;
-    private ClosenessRewarder rewarderBoxM;
-    private ClosenessRewarder rewarderBoxN;
-    private OnlyImprovingRewarder rewarderLHand;
-    private OnlyImprovingRewarder rewarderRHand;
+    private IRewarder rewarderBox;
+    private IRewarder rewarderBoxM;
+    private IRewarder rewarderBoxN;
+    private IRewarder rewarderLHand;
+    private IRewarder rewarderRHand;
 
 
     public override void Initialize()
@@ -35,8 +35,8 @@ public class AgentTrainer : Agent
         rewarderBox = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude);
         rewarderBoxM = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude, 0.6f);
         rewarderBoxN = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude, 0.3f);
-        rewarderLHand = new OnlyImprovingRewarder(() => (m_chain.handL.transform.position - target.position).magnitude, 0.6f);
-        rewarderRHand = new OnlyImprovingRewarder(() => (m_chain.handR.transform.position - target.position).magnitude, 0.6f);
+        rewarderLHand = new ClosenessRewarder(() => (m_chain.handL.transform.position - target.position).magnitude, 0.6f);
+        rewarderRHand = new ClosenessRewarder(() => (m_chain.handR.transform.position - target.position).magnitude, 0.6f);
     }
 
     /// <summary>
@@ -69,11 +69,6 @@ public class AgentTrainer : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        var cubeForward = m_chain.hips.transform.forward;
-
-        // sensor.AddObservation(Quaternion.FromToRotation(hips.forward, cubeForward));
-        // sensor.AddObservation(Quaternion.FromToRotation(head.forward, cubeForward));
-
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(target.transform.position));
         sensor.AddObservation(target.transform.localRotation);
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(targetPosition.transform.position));
@@ -96,7 +91,7 @@ public class AgentTrainer : Agent
         var dotOrient = Mathf.Max(DotOrientation(right));
         var dot = dotPosition * dotOrient;
 
-        reward += -0.01f; //Time penalty
+        reward += -0.1f; //Time penalty
         reward += rewarderRHand.Reward(); //*dot
         reward += rewarderLHand.Reward(); //*dot 
 
