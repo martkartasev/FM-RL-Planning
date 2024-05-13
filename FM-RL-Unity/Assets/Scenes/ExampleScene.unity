@@ -9284,6 +9284,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4267144870387134734, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
+      propertyPath: m_Mass
+      value: 200
+      objectReference: {fileID: 0}
     - target: {fileID: 4271741027227963936, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
       propertyPath: m_LocalScale.x
       value: 0
@@ -9304,6 +9308,14 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6330107382970443453, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
+      propertyPath: DecisionPeriod
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6330107382970443453, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
+      propertyPath: TakeActionsBetweenDecisions
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7030819205914372127, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
       propertyPath: m_Name
       value: LifterAgentEnv
@@ -9315,7 +9327,7 @@ PrefabInstance:
     - target: {fileID: 7438702243391671574, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
       propertyPath: m_Model
       value: 
-      objectReference: {fileID: 5022602860645237092, guid: 9398a35cda9c3dc4f9146e6b25351dcb, type: 3}
+      objectReference: {fileID: 5022602860645237092, guid: 9737fda53118ecf48a1b4d699a7df3e3, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 402310933458519485, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}

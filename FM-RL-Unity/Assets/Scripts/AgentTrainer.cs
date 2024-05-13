@@ -61,10 +61,6 @@ public class AgentTrainer : Agent
             sensor.AddObservation(hips.transform.InverseTransformDirection(bp.transform.position - hips.transform.position));
             //sensor.AddObservation(bp.currentStrength / m_JdController.maxJointForceLimit);
         }
-        else
-        {
-            sensor.AddObservation(hips.transform.position / 8);
-        }
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -129,23 +125,22 @@ public class AgentTrainer : Agent
         var dotOrient = Mathf.Max(DotOrientation(right));
         var dot = dotPosition * dotOrient;
 
-        reward += -1f / MaxStep; //Time penalty
-        reward += rewarderRHand.Reward() * 0.5f / MaxStep; //*dot
-        reward += rewarderLHand.Reward() * 0.5f / MaxStep; //*dot 
+        reward += rewarderRHand.Reward() * 0.5f; //*dot
+        reward += rewarderLHand.Reward() * 0.5f; //*dot 
+        // reward += rewarderBox.Reward();
+        // reward += rewarderBoxM.Reward();
+        // reward += rewarderBoxN.Reward();
+        //
+        // reward /= 4;
+        reward += -1f; //Time penalty
 
-        reward += rewarderBox.Reward() / MaxStep;
-        reward += rewarderBoxM.Reward() / MaxStep;
-        reward += rewarderBoxN.Reward() / MaxStep;
+        // if ((targetPosition.position - target.position).magnitude < 0.08f)
+        // {
+        //     // reward += 10;
+        //     targetPosition.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(transform);
+        // }
 
-        reward /= 4;
-
-        if ((targetPosition.position - target.position).magnitude < 0.08f)
-        {
-            // reward += 10;
-            targetPosition.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(transform);
-        }
-
-        return reward;
+        return reward / MaxStep; //Normalize to -1 : 1 per episode
     }
 
     private float DotOrientation(Vector3 boxBaseVector)
