@@ -62,6 +62,7 @@ public class ArticulationChainComponent : MonoBehaviour
             XParameters = DriveParameters.CreateParameters(articulationBody.xDrive);
             YParameters = DriveParameters.CreateParameters(articulationBody.yDrive);
             ZParameters = DriveParameters.CreateParameters(articulationBody.zDrive);
+            this.articulationBody.GetJointForces(new List<float>());
         }
 
         public void SetDriveTargets(float x, float y, float z)
@@ -91,6 +92,9 @@ public class ArticulationChainComponent : MonoBehaviour
                     articulationBody.jointVelocity = new ArticulationReducedSpace(0f, 0f, 0f);
                     break;
             }
+
+            articulationBody.velocity = Vector3.zero;
+            articulationBody.angularVelocity = Vector3.zero;
         }
 
         public void SetDriveStrength(float x)

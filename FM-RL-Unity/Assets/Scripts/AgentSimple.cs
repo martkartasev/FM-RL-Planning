@@ -27,7 +27,7 @@ public class AgentSimple : Agent
     /// </summary>
     public override void OnEpisodeBegin()
     {
-        m_chain.Restart(transform.parent.TransformPoint(Vector3.zero), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
+        m_chain.Restart(m_chain.hips.transform.parent.TransformPoint(new Vector3(0, 0.1f, 0)), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
     }
 
     /// <summary>
@@ -73,9 +73,27 @@ public class AgentSimple : Agent
 
         var forward = continuousActions[++i];
         var turn = continuousActions[++i];
-        
-        m_chain.root.AddForce(m_chain.root.transform.forward * forward * 10);
-        m_chain.root.AddTorque(m_chain.root.transform.up * turn * 10);
+
+        m_chain.root.AddRelativeForce(Vector3.forward * forward * 6.5f, ForceMode.Acceleration);
+        m_chain.root.AddRelativeTorque(Vector3.up * turn * 25, ForceMode.Acceleration);
+
+        m_chain.DriveControllers[m_chain.spine].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.head].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+
+        m_chain.DriveControllers[m_chain.armL].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.forearmL].SetDriveTargets(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.handL].SetDriveTargets(0, continuousActions[++i], 0);
+
+        m_chain.DriveControllers[m_chain.armR].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.forearmR].SetDriveTargets(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.handR].SetDriveTargets(0, continuousActions[++i], 0);
+
+        var resetSignal = actionBuffers.DiscreteActions[1];
+        if (resetSignal == 1)
+        {
+            EndEpisode();
+        }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
@@ -85,12 +103,20 @@ public class AgentSimple : Agent
         {
             actions[0] = 1;
         }
+        else if (Input.GetKey("down"))
+        {
+            actions[0] = -1;
+        }
         else
         {
             actions[0] = 0;
         }
-       
+
         if (Input.GetKey("left"))
+        {
+            actions[1] = -1;
+        }
+        else if (Input.GetKey("right"))
         {
             actions[1] = 1;
         }
@@ -98,15 +124,9 @@ public class AgentSimple : Agent
         {
             actions[1] = 0;
         }
-        
-        if (Input.GetKey("right"))
-        {
-            actions[1] = -1;
-        }
-        else
-        {
-            actions[1] = 0;
-        }
-        
+
+        var actionsOutDiscreteActions = actionsOut.DiscreteActions;
+        actionsOutDiscreteActions[0] = 0;
+        actionsOutDiscreteActions[1] = Input.GetKey("space") ? 1 : 0;
     }
 }
