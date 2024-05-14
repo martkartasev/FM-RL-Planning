@@ -591,6 +591,14 @@ MonoBehaviour:
   MaxStep: 0
   target: {fileID: 0}
   targetPosition: {fileID: 0}
+  wheelVelL: {fileID: 0}
+  wheelYawL: {fileID: 0}
+  wheelVelR: {fileID: 0}
+  wheelYawR: {fileID: 0}
+  eyeCamera: {fileID: 0}
+  thirdPersonCamera: {fileID: 0}
+  frontCamera: {fileID: 0}
+  topCamera: {fileID: 0}
 --- !u!1 &3051306872276215136
 GameObject:
   m_ObjectHideFlags: 0

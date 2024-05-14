@@ -1,3 +1,4 @@
+using DefaultNamespace;
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -53,23 +54,23 @@ public class AgentTrainer : Agent
         //Note: You can get these velocities in world space as well but it may not train as well.
         var hips = m_chain.root;
 
-        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.velocity));
-        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.angularVelocity));
+        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.velocity).NormalizeVector(5f));
+        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.angularVelocity).NormalizeVector(5f));
         sensor.AddObservation(bp.transform.localRotation);
 
         if (bp != hips)
         {
             //Get position relative to hips in the context of our orientation cube's space
-            sensor.AddObservation(hips.transform.InverseTransformDirection(bp.transform.position - hips.transform.position));
+            sensor.AddObservation(hips.transform.InverseTransformDirection(bp.transform.position - hips.transform.position).NormalizeVector(1.75f));
             //sensor.AddObservation(bp.currentStrength / m_JdController.maxJointForceLimit);
         }
     }
-
+    
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(m_chain.hips.transform.InverseTransformDirection(target.transform.position - m_chain.hips.transform.position));
+        sensor.AddObservation(m_chain.hips.transform.InverseTransformDirection(target.transform.position - m_chain.hips.transform.position).NormalizeVector(2f));
         sensor.AddObservation(target.transform.localRotation);
-        sensor.AddObservation(m_chain.hips.transform.InverseTransformDirection(targetPosition.transform.position - m_chain.hips.transform.position));
+        sensor.AddObservation(m_chain.hips.transform.InverseTransformDirection(targetPosition.transform.position - m_chain.hips.transform.position).NormalizeVector(2f));
 
         foreach (var bodyPart in m_chain.bodyParts)
         {
