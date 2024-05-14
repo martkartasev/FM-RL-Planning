@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
@@ -16,7 +17,15 @@ public class AgentSimple : Agent
     private OnlyImprovingRewarder rewarderLHand;
     private OnlyImprovingRewarder rewarderRHand;
 
+    public ArticulationBody wheelVelL;
+    public ArticulationBody wheelYawL;
+    public ArticulationBody wheelVelR;
+    public ArticulationBody wheelYawR;
 
+    public Camera eyeCamera;
+    public Camera thirdPersonCamera;
+    public Camera frontCamera;
+    public Camera topCamera;
     public override void Initialize()
     {
         m_chain = GetComponent<ArticulationChainComponent>();
@@ -28,6 +37,8 @@ public class AgentSimple : Agent
     public override void OnEpisodeBegin()
     {
         m_chain.Restart(m_chain.hips.transform.parent.TransformPoint(new Vector3(0, 0.1f, 0)), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
+        
+        target.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(m_chain.hips.transform);
     }
 
     /// <summary>
@@ -65,6 +76,37 @@ public class AgentSimple : Agent
         }
     }
 
+    public void FixedUpdate()
+    {
+        if (Input.GetKey(KeyCode.Alpha1))
+        {
+            eyeCamera.transform.gameObject.SetActive(true);
+            thirdPersonCamera.transform.gameObject.SetActive(false);
+            frontCamera.transform.gameObject.SetActive(false);
+            topCamera.transform.gameObject.SetActive(false);
+        }
+        if (Input.GetKey(KeyCode.Alpha2))
+        {
+            eyeCamera.transform.gameObject.SetActive(false);
+            thirdPersonCamera.transform.gameObject.SetActive(true);
+            frontCamera.transform.gameObject.SetActive(false);
+            topCamera.transform.gameObject.SetActive(false);
+        }
+        if (Input.GetKey(KeyCode.Alpha3))
+        {
+            eyeCamera.transform.gameObject.SetActive(false);
+            thirdPersonCamera.transform.gameObject.SetActive(false);
+            frontCamera.transform.gameObject.SetActive(true);
+            topCamera.transform.gameObject.SetActive(false);
+        }
+        if (Input.GetKey(KeyCode.Alpha4))
+        {
+            eyeCamera.transform.gameObject.SetActive(false);
+            thirdPersonCamera.transform.gameObject.SetActive(false);
+            frontCamera.transform.gameObject.SetActive(false);
+            topCamera.transform.gameObject.SetActive(true);
+        }
+    }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
@@ -74,8 +116,11 @@ public class AgentSimple : Agent
         var forward = continuousActions[++i];
         var turn = continuousActions[++i];
 
-        m_chain.root.AddRelativeForce(Vector3.forward * forward * 6.5f, ForceMode.Acceleration);
-        m_chain.root.AddRelativeTorque(Vector3.up * turn * 25, ForceMode.Acceleration);
+        wheelVelL.SetDriveTargetVelocity(ArticulationDriveAxis.X, forward*400);
+        wheelVelR.SetDriveTargetVelocity(ArticulationDriveAxis.X, forward*400);
+        
+        wheelYawL.SetDriveTarget(ArticulationDriveAxis.X, turn*15);
+        wheelYawR.SetDriveTarget(ArticulationDriveAxis.X, turn*15);
 
         m_chain.DriveControllers[m_chain.spine].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
         m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);

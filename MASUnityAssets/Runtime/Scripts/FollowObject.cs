@@ -28,21 +28,11 @@ namespace Scripts
 
         void FixedUpdate()
         {
-            if (!CameraFixed)
-            {
-                transform.rotation = Quaternion.LookRotation(target_object.transform.position + cameraTargetOffset - transform.position);
-                transform.position = target_object.position
-                                     + cameraPosition.x * target_object.right
-                                     + cameraPosition.z * target_object.forward
-                                     + cameraPosition.y * target_object.up;
-            }
-            else
-            {
-                transform.position = target_object.position
-                                     + cameraPosition.x * Vector3.right
-                                     + cameraPosition.z * Vector3.forward
-                                     + cameraPosition.y * Vector3.up;
-            }
+            transform.position = target_object.position
+                                 + cameraPosition.x * Vector3.right
+                                 + cameraPosition.z * Vector3.forward
+                                 + cameraPosition.y * Vector3.up;
+            if (CameraFixed) transform.rotation = Quaternion.Euler(target_object.eulerAngles.x, target_object.eulerAngles.y, 0);
         }
     }
 }
