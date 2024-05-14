@@ -15,11 +15,13 @@ public class AgentTrainer : Agent
     private IRewarder rewarderBoxN;
     private IRewarder rewarderLHand;
     private IRewarder rewarderRHand;
-
+    private float reward_norm_mult;
 
     public override void Initialize()
     {
         m_chain = GetComponent<ArticulationChainComponent>();
+        var decisionRequester = GetComponent<DecisionRequester>();
+        reward_norm_mult = 1f / MaxStep * (decisionRequester.TakeActionsBetweenDecisions ? 1f : decisionRequester.DecisionPeriod);
     }
 
     /// <summary>
@@ -35,8 +37,8 @@ public class AgentTrainer : Agent
         rewarderBox = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude);
         rewarderBoxM = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude, 0.6f);
         rewarderBoxN = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude, 0.3f);
-        rewarderLHand = new ClosenessRewarder(() => (m_chain.handL.transform.position - target.position).magnitude, 1.0f);
-        rewarderRHand = new ClosenessRewarder(() => (m_chain.handR.transform.position - target.position).magnitude, 1.0f);
+        rewarderLHand = new OnlyImprovingRewarder(() => (m_chain.handL.transform.position - target.position).magnitude, 0.5f);
+        rewarderRHand = new OnlyImprovingRewarder(() => (m_chain.handR.transform.position - target.position).magnitude, 0.5f);
     }
 
     /// <summary>
@@ -125,14 +127,15 @@ public class AgentTrainer : Agent
         var dotOrient = Mathf.Max(DotOrientation(right));
         var dot = dotPosition * dotOrient;
 
-        reward += rewarderRHand.Reward() * 0.5f; //*dot
+
+        reward += rewarderBox.Reward() * reward_norm_mult;
+        reward += rewarderBoxM.Reward() * reward_norm_mult;
+        reward += rewarderBoxN.Reward() * reward_norm_mult;
+        reward += rewarderRHand.Reward() * 0.5f; // Only goes to one per episode anyway //*dot 
         reward += rewarderLHand.Reward() * 0.5f; //*dot 
-        // reward += rewarderBox.Reward();
-        // reward += rewarderBoxM.Reward();
-        // reward += rewarderBoxN.Reward();
-        //
-        // reward /= 4;
-        reward += -1f; //Time penalty
+        reward /= 4;
+
+        reward += -1f * reward_norm_mult; //Time penalty //Normalize to -1 : 1 per episode
 
         // if ((targetPosition.position - target.position).magnitude < 0.08f)
         // {
@@ -140,7 +143,7 @@ public class AgentTrainer : Agent
         //     targetPosition.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(transform);
         // }
 
-        return reward / MaxStep; //Normalize to -1 : 1 per episode
+        return reward;
     }
 
     private float DotOrientation(Vector3 boxBaseVector)
