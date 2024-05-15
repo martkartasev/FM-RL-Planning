@@ -1,3 +1,5 @@
+import os
+import platform
 import numpy as np
 from pynput import keyboard
 from mlagents_envs.base_env import ActionTuple
@@ -118,8 +120,28 @@ if __name__ == '__main__':
     engine.set_configuration_parameters(time_scale=1)  # Can speed up simulation between steps with this
     engine.set_configuration_parameters(quality_level=0)
 
+    # Get the current working directory
+    current_path = os.getcwd()
+    # Detect the operating system
+    system = platform.system()
+
+    # Dictionary mapping operating systems to their respective executable paths
+    exe_paths = {
+        "Darwin": os.path.join(current_path, "builds/mac/build.app/Contents/MacOS/FM-RL-Unity"),
+        "Windows": os.path.join(current_path, r"builds\win\FM-RL-Unity.exe"),
+        "Linux": os.path.join(current_path, "builds/linux/env.x86_64")
+    }
+
+    # Get the executable path based on the operating system
+    try:
+        exe_file = exe_paths[system]
+    except KeyError:
+        raise ValueError(f"Unknown operating system: {system}")
+
+    print(f"Executable path: {exe_file}")
+    
     env = UnityEnvironment(
-        file_name="/home/selauken/workplace/fm-rl/FM-RL-Planning/builds/linux/env.x86_64",
+        file_name=exe_file,
         no_graphics=False,  # Can disable graphics if needed
         base_port=10030,  # for starting multiple envs
         side_channels=[engine])
