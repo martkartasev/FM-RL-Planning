@@ -9903,6 +9903,10 @@ PrefabInstance:
       propertyPath: m_ParentAnchorPosition.y
       value: -0.000000007450581
       objectReference: {fileID: 0}
+    - target: {fileID: 3908861181862133633, guid: 8611ff8f52b5180459abc324028bae2c, type: 3}
+      propertyPath: m_CollisionDetectionMode
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3983896509162677460, guid: 8611ff8f52b5180459abc324028bae2c, type: 3}
       propertyPath: m_ParentAnchorPosition.x
       value: -0.35999995
@@ -9918,6 +9922,10 @@ PrefabInstance:
     - target: {fileID: 4018723426407596428, guid: 8611ff8f52b5180459abc324028bae2c, type: 3}
       propertyPath: m_Name
       value: WheeledArticulator
+      objectReference: {fileID: 0}
+    - target: {fileID: 6329206886590534706, guid: 8611ff8f52b5180459abc324028bae2c, type: 3}
+      propertyPath: m_CollisionDetectionMode
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7989210733381676755, guid: 8611ff8f52b5180459abc324028bae2c, type: 3}
       propertyPath: m_ParentAnchorPosition.x
@@ -10088,7 +10096,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!1 &5842619048794660495
 GameObject:
   m_ObjectHideFlags: 0

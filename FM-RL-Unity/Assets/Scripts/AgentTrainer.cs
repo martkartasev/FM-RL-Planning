@@ -8,6 +8,7 @@ public class AgentTrainer : Agent
 {
     [Header("Target")] public Transform target; //Target the agent will try to grasp.
     [Header("Target Position")] public Transform targetPosition;
+    public Transform referenceFrame;
 
     private ArticulationChainComponent m_chain;
 
@@ -25,6 +26,7 @@ public class AgentTrainer : Agent
         reward_norm_mult = 1f / MaxStep * (decisionRequester.TakeActionsBetweenDecisions ? 1f : decisionRequester.DecisionPeriod);
     }
 
+
     /// <summary>
     /// Loop over body parts and reset them to initial conditions.
     /// </summary>
@@ -38,8 +40,27 @@ public class AgentTrainer : Agent
         rewarderBox = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude);
         rewarderBoxM = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude, 0.6f);
         rewarderBoxN = new ClosenessRewarder(() => (targetPosition.position - target.position).magnitude, 0.3f);
-        rewarderLHand = new OnlyImprovingRewarder(() => (m_chain.handL.transform.position - target.position).magnitude, 0.5f);
-        rewarderRHand = new OnlyImprovingRewarder(() => (m_chain.handR.transform.position - target.position).magnitude, 0.5f);
+        rewarderLHand = new ClosenessRewarder(() => (m_chain.handL.transform.position - target.position).magnitude, 0.5f);
+        rewarderRHand = new ClosenessRewarder(() => (m_chain.handR.transform.position - target.position).magnitude, 0.5f);
+    }
+
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        var targetWorldPos = target.transform.position;
+        var goalPositionWorldPos = targetPosition.transform.position;
+
+        sensor.AddObservation(target.transform.localRotation);
+        sensor.AddObservation(referenceFrame.InverseTransformDirection(targetWorldPos).NormalizeVector(2f));
+        sensor.AddObservation(referenceFrame.InverseTransformDirection(goalPositionWorldPos).NormalizeVector(2f));
+        sensor.AddObservation(referenceFrame.InverseTransformVector(targetWorldPos - goalPositionWorldPos).NormalizeVector(2f));
+
+        sensor.AddObservation(referenceFrame.InverseTransformVector(targetWorldPos - m_chain.handL.transform.position).NormalizeVector(1f));
+        sensor.AddObservation(referenceFrame.InverseTransformVector(targetWorldPos - m_chain.handR.transform.position).NormalizeVector(1f));
+
+        foreach (var bodyPart in m_chain.bodyParts)
+        {
+            CollectObservationBodyPart(bodyPart, sensor);
+        }
     }
 
     /// <summary>
@@ -52,30 +73,11 @@ public class AgentTrainer : Agent
 
         //Get velocities in the context of our orientation cube's space
         //Note: You can get these velocities in world space as well but it may not train as well.
-        var hips = m_chain.root;
 
-        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.velocity).NormalizeVector(5f));
-        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.angularVelocity).NormalizeVector(5f));
+        sensor.AddObservation(referenceFrame.InverseTransformDirection(bp.velocity).NormalizeVector(5f));
+        sensor.AddObservation(referenceFrame.InverseTransformDirection(bp.angularVelocity).NormalizeVector(5f));
         sensor.AddObservation(bp.transform.localRotation);
-
-        if (bp != hips)
-        {
-            //Get position relative to hips in the context of our orientation cube's space
-            sensor.AddObservation(hips.transform.InverseTransformDirection(bp.transform.position - hips.transform.position).NormalizeVector(1.75f));
-            //sensor.AddObservation(bp.currentStrength / m_JdController.maxJointForceLimit);
-        }
-    }
-    
-    public override void CollectObservations(VectorSensor sensor)
-    {
-        sensor.AddObservation(m_chain.hips.transform.InverseTransformDirection(target.transform.position - m_chain.hips.transform.position).NormalizeVector(2f));
-        sensor.AddObservation(target.transform.localRotation);
-        sensor.AddObservation(m_chain.hips.transform.InverseTransformDirection(targetPosition.transform.position - m_chain.hips.transform.position).NormalizeVector(2f));
-
-        foreach (var bodyPart in m_chain.bodyParts)
-        {
-            CollectObservationBodyPart(bodyPart, sensor);
-        }
+        sensor.AddObservation(referenceFrame.InverseTransformDirection(bp.transform.position - m_chain.chest.transform.position).NormalizeVector(1.5f));
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -128,13 +130,15 @@ public class AgentTrainer : Agent
         var dotOrient = Mathf.Max(DotOrientation(right));
         var dot = dotPosition * dotOrient;
 
+        reward += (m_chain.handL.GetComponent<TargetContact>().hasContact ? 1 : 0) * 0.5f * reward_norm_mult;
+        reward += (m_chain.handR.GetComponent<TargetContact>().hasContact ? 1 : 0) * 0.5f * reward_norm_mult;
 
         reward += rewarderBox.Reward() * reward_norm_mult;
         reward += rewarderBoxM.Reward() * reward_norm_mult;
         reward += rewarderBoxN.Reward() * reward_norm_mult;
-        reward += rewarderRHand.Reward() * 0.5f; // Only goes to one per episode anyway //*dot 
-        reward += rewarderLHand.Reward() * 0.5f; //*dot 
-        reward /= 4;
+        reward += rewarderRHand.Reward() * 0.5f * reward_norm_mult; // Only goes to one per episode anyway //*dot 
+        reward += rewarderLHand.Reward() * 0.5f * reward_norm_mult; //*dot 
+        reward /= 5;
 
         reward += -1f * reward_norm_mult; //Time penalty //Normalize to -1 : 1 per episode
 
@@ -163,5 +167,9 @@ public class AgentTrainer : Agent
 
         //Vector3.Dot(leftHand, boxBaseVector) * Vector3.Dot(rightHand, boxBaseVector) *
         return -Vector3.Dot(rightHand, leftHand);
+    }
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
     }
 }

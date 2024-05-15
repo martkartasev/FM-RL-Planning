@@ -28,8 +28,8 @@ def produce_continuous_action(agent_obs):
             continuous_actions[10] = -0.1
             continuous_actions[14] = -0.1
         if keyboard.is_pressed('3'):
-            continuous_actions[10] = 0.2
-            continuous_actions[14] = 0.2
+            continuous_actions[10] = 0.25
+            continuous_actions[14] = 0.25
             continuous_actions[12] = -0.25
             continuous_actions[16] = -0.25
             continuous_actions[13] = -1
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     env = UnityEnvironment(
         file_name=r"C:\Users\Mart9\Workspace\FM-RL-Planning\builds\win\FM-RL-Unity.exe",
         no_graphics=False,  # Can disable graphics if needed
-        base_port=10030,  # for starting multiple envs
+        base_port=10100,  # for starting multiple envs
         side_channels=[engine])
     env.reset()  # Initializes env
     run_env(env)

@@ -66,7 +66,7 @@ ArticulationBody:
   m_Enabled: 1
   serializedVersion: 5
   m_Mass: 6
-  m_ParentAnchorPosition: {x: -0.0000003054738, y: 0.16945988, z: 0}
+  m_ParentAnchorPosition: {x: 0, y: 0.16945988, z: 0}
   m_ParentAnchorRotation: {x: 0.70710677, y: 0, z: 0, w: -0.70710677}
   m_AnchorPosition: {x: 0, y: -0.28, z: 0}
   m_AnchorRotation: {x: 0.70710677, y: 0, z: 0, w: -0.70710677}
@@ -83,7 +83,7 @@ ArticulationBody:
     upperLimit: 10
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -92,7 +92,7 @@ ArticulationBody:
     upperLimit: 20
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -290,7 +290,7 @@ ArticulationBody:
   m_GameObject: {fileID: 2620982909596782684}
   m_Enabled: 1
   serializedVersion: 5
-  m_Mass: 80
+  m_Mass: 200
   m_ParentAnchorPosition: {x: 0, y: 0, z: 0}
   m_ParentAnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
@@ -499,7 +499,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 147
+    VectorObservationSize: 159
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 16
@@ -535,6 +535,7 @@ MonoBehaviour:
   MaxStep: 750
   target: {fileID: 0}
   targetPosition: {fileID: 0}
+  referenceFrame: {fileID: 0}
 --- !u!114 &6548155641045407577
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -668,7 +669,7 @@ ArticulationBody:
   m_Enabled: 1
   serializedVersion: 5
   m_Mass: 10
-  m_ParentAnchorPosition: {x: -0.0000003054738, y: 0.40000004, z: 0}
+  m_ParentAnchorPosition: {x: 0, y: 0.40000004, z: 0}
   m_ParentAnchorRotation: {x: -0.70710677, y: 0, z: 0, w: 0.70710677}
   m_AnchorPosition: {x: 0, y: -0.1, z: 0}
   m_AnchorRotation: {x: -0.70710677, y: 0, z: 0, w: 0.70710677}
@@ -685,7 +686,7 @@ ArticulationBody:
     upperLimit: 58
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -694,7 +695,7 @@ ArticulationBody:
     upperLimit: 20
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -703,7 +704,7 @@ ArticulationBody:
     upperLimit: 74
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1155,7 +1156,7 @@ ArticulationBody:
   m_Enabled: 1
   serializedVersion: 5
   m_Mass: 8
-  m_ParentAnchorPosition: {x: -0.0000003054738, y: 0.10565007, z: 0}
+  m_ParentAnchorPosition: {x: 0, y: 0.10565007, z: 0}
   m_ParentAnchorRotation: {x: 0.70710677, y: 0, z: 0, w: -0.70710677}
   m_AnchorPosition: {x: 0, y: -0.16, z: 0}
   m_AnchorRotation: {x: 0.70710677, y: 0, z: 0, w: -0.70710677}
@@ -1172,7 +1173,7 @@ ArticulationBody:
     upperLimit: 40
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1181,7 +1182,7 @@ ArticulationBody:
     upperLimit: 20
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1190,7 +1191,7 @@ ArticulationBody:
     upperLimit: 15
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1382,7 +1383,7 @@ ArticulationBody:
   m_Enabled: 1
   serializedVersion: 5
   m_Mass: 3
-  m_ParentAnchorPosition: {x: -0.2279998, y: 0, z: 0}
+  m_ParentAnchorPosition: {x: -0.22799999, y: 0, z: 0}
   m_ParentAnchorRotation: {x: 0.49999997, y: 0.49999997, z: -0.49999997, w: -0.49999997}
   m_AnchorPosition: {x: 0.16, y: 0, z: 0}
   m_AnchorRotation: {x: 0.49999997, y: 0.49999997, z: -0.49999997, w: -0.49999997}
@@ -1399,7 +1400,7 @@ ArticulationBody:
     upperLimit: 180
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1408,7 +1409,7 @@ ArticulationBody:
     upperLimit: 100
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 5000
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1609,7 +1610,7 @@ ArticulationBody:
   m_Enabled: 1
   serializedVersion: 5
   m_Mass: 4
-  m_ParentAnchorPosition: {x: -0.2699998, y: 0, z: 0}
+  m_ParentAnchorPosition: {x: -0.26999998, y: 0, z: 0}
   m_ParentAnchorRotation: {x: 0.49999997, y: 0.49999997, z: -0.49999997, w: -0.49999997}
   m_AnchorPosition: {x: 0.18, y: 0, z: 0}
   m_AnchorRotation: {x: 0.49999997, y: 0.49999997, z: -0.49999997, w: -0.49999997}
@@ -1626,7 +1627,7 @@ ArticulationBody:
     upperLimit: 162
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1635,7 +1636,7 @@ ArticulationBody:
     upperLimit: 100
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1748,7 +1749,7 @@ ArticulationBody:
   m_Enabled: 1
   serializedVersion: 5
   m_Mass: 2
-  m_ParentAnchorPosition: {x: 0.19500023, y: 0, z: 0}
+  m_ParentAnchorPosition: {x: 0.195, y: 0, z: -0.000000007450581}
   m_ParentAnchorRotation: {x: 0.70710677, y: 0, z: 0.7071069, w: 0}
   m_AnchorPosition: {x: 0, y: 0, z: 0.06}
   m_AnchorRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
@@ -1765,7 +1766,7 @@ ArticulationBody:
     upperLimit: 0
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 5000
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1774,7 +1775,7 @@ ArticulationBody:
     upperLimit: 90
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1803,7 +1804,7 @@ ArticulationBody:
   m_ImplicitTensor: 1
   m_Immovable: 0
   m_UseGravity: 1
-  m_CollisionDetectionMode: 0
+  m_CollisionDetectionMode: 2
 --- !u!114 &7547052130812973089
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1972,7 +1973,7 @@ ArticulationBody:
   m_Enabled: 1
   serializedVersion: 5
   m_Mass: 2
-  m_ParentAnchorPosition: {x: -0.19500035, y: 0, z: 0}
+  m_ParentAnchorPosition: {x: -0.195, y: 0, z: -0.000000007450581}
   m_ParentAnchorRotation: {x: 0, y: 0.70710677, z: 0, w: -0.7071069}
   m_AnchorPosition: {x: 0, y: 0, z: 0.06}
   m_AnchorRotation: {x: 0, y: 1, z: 0, w: -0.00000004371139}
@@ -1989,7 +1990,7 @@ ArticulationBody:
     upperLimit: 0
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 5000
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -1998,7 +1999,7 @@ ArticulationBody:
     upperLimit: 90
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -2027,7 +2028,7 @@ ArticulationBody:
   m_ImplicitTensor: 1
   m_Immovable: 0
   m_UseGravity: 1
-  m_CollisionDetectionMode: 0
+  m_CollisionDetectionMode: 2
 --- !u!114 &6052243372021618192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2114,7 +2115,7 @@ ArticulationBody:
   m_Enabled: 1
   serializedVersion: 5
   m_Mass: 4
-  m_ParentAnchorPosition: {x: 0.26539963, y: 0, z: 0}
+  m_ParentAnchorPosition: {x: 0.2654, y: 0, z: 0}
   m_ParentAnchorRotation: {x: 0.49999997, y: -0.49999997, z: 0.49999997, w: -0.49999997}
   m_AnchorPosition: {x: -0.18, y: 0, z: 0}
   m_AnchorRotation: {x: 0.49999997, y: -0.49999997, z: 0.49999997, w: -0.49999997}
@@ -2131,7 +2132,7 @@ ArticulationBody:
     upperLimit: 162
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 5000
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -2140,7 +2141,7 @@ ArticulationBody:
     upperLimit: 100
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -2512,7 +2513,7 @@ ArticulationBody:
   m_Enabled: 1
   serializedVersion: 5
   m_Mass: 3
-  m_ParentAnchorPosition: {x: 0.2210998, y: 0, z: 0}
+  m_ParentAnchorPosition: {x: 0.22109997, y: 0, z: 0}
   m_ParentAnchorRotation: {x: -0.49999997, y: 0.49999997, z: -0.49999997, w: 0.49999997}
   m_AnchorPosition: {x: -0.16, y: 0, z: 0}
   m_AnchorRotation: {x: -0.49999997, y: 0.49999997, z: -0.49999997, w: 0.49999997}
@@ -2529,7 +2530,7 @@ ArticulationBody:
     upperLimit: 180
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 250
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -2538,7 +2539,7 @@ ArticulationBody:
     upperLimit: 100
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 5000
     target: 0
     targetVelocity: 0
     driveType: 0

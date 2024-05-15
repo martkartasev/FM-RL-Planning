@@ -368,9 +368,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3747689489791764807, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5200938923134799482, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
       propertyPath: m_ParentAnchorPosition.x
       value: -0.0000003054738
+      objectReference: {fileID: 0}
+    - target: {fileID: 5327278957453475651, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
+      propertyPath: m_ParentAnchorPosition.x
+      value: 0.19500023
+      objectReference: {fileID: 0}
+    - target: {fileID: 5327278957453475651, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
+      propertyPath: m_ParentAnchorPosition.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5383428261020463268, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
       propertyPath: m_ParentAnchorPosition.x
@@ -392,10 +404,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: LifterAgentEnv
       objectReference: {fileID: 0}
-    - target: {fileID: 7438702243391671574, guid: af6096ba48d588d4ba28bbf0b6fbf3c4, type: 3}
-      propertyPath: m_Model
-      value: 
-      objectReference: {fileID: 5022602860645237092, guid: 008cebb8d0bf55e4cb59bd5dd2a1d358, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
