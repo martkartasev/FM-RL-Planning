@@ -16,7 +16,7 @@ If you already cloned but forgot the tag use
 ```
 git submodule update --init --recursive
 ```
-
+*Note: change to http if ssh is blocked*
 
 ### Simple install
 To run the python example with a built version of the engine all you need is to install mlagents-envs and the keyboard module.
@@ -24,8 +24,8 @@ To run the python example with a built version of the engine all you need is to 
 This is enough to run the binaries from Unity.
 
 ```
-pip install -e ../ml-agents/ml-agents-envs
-pip install keyboard
+pip install -e ./ml-agents/ml-agents-envs
+pip install pynput
 ```
 
 ### Development install with full Unity and MLAgents support
@@ -39,10 +39,16 @@ conda create -n mlagents python=3.10.12 && conda activate mlagents
 
 pip3 install torch~=2.2.1 --index-url https://download.pytorch.org/whl/cu121
 
-pip install -e ../ml-agents/ml-agents-envs
-pip install -e ../ml-agents/ml-agents
+pip install -e ./ml-agents/ml-agents-envs
+pip install -e ./ml-agents/ml-agents
 ```
 
 This install the mlagents version from your local directory. This is a version that is ahead of the current "released" branch, but has a few nice features, like Sentis.
 
 For more details see https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Installation.md
+
+### Permission issue
+In case the executable cannot be run on linux, it can be the fact that there is a permission restriction. Run the following to the files:
+```
+chmod +x -R ./*
+```
