@@ -138,9 +138,10 @@ public class AgentTrainer : Agent
         reward += rewarderBoxN.Reward() * reward_norm_mult;
         reward += rewarderRHand.Reward() * 0.5f * reward_norm_mult; // Only goes to one per episode anyway //*dot 
         reward += rewarderLHand.Reward() * 0.5f * reward_norm_mult; //*dot 
-        reward /= 5;
+        reward /= 5; 
 
-        reward += -1f * reward_norm_mult; //Time penalty //Normalize to -1 : 1 per episode
+        reward += -0.1f * reward_norm_mult; //Time penalty
+        // Even smaller?
 
         // if ((targetPosition.position - target.position).magnitude < 0.08f)
         // {
