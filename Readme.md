@@ -52,3 +52,10 @@ In case the executable cannot be run on linux, it can be the fact that there is 
 ```
 chmod +x -R ./*
 ```
+
+Similarly, for MAC
+
+```
+cd <PATH_TO_YOUR_APP>/build.app/Contents/MacOS/
+chmod -R 777 FM-RL-Unity
+```
