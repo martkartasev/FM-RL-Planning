@@ -8,7 +8,7 @@ A simple mobile wheeled robot with an articulated body in a Unity scene.
 This project features a submodule. To ensure you get the submodule initialized when you set up your directory run the initial clone with
 
 ```
-git clone --recurse-submodules git@github.com:martkartasev/FM-RL-Planning.git
+git clone --recursive git@github.com:martkartasev/FM-RL-Planning.git
 ```
 
 If you already cloned but forgot the tag use
@@ -41,6 +41,9 @@ pip3 install torch~=2.2.1 --index-url https://download.pytorch.org/whl/cu121
 
 pip install -e ./ml-agents/ml-agents-envs
 pip install -e ./ml-agents/ml-agents
+pip install transformers
+pip install accelerate
+pip install bitsandbytes
 ```
 
 This install the mlagents version from your local directory. This is a version that is ahead of the current "released" branch, but has a few nice features, like Sentis.
