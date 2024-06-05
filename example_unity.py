@@ -29,26 +29,26 @@ def produce_continuous_action(agent_obs):
 
     continuous_actions = np.zeros(18)
     # You can try moving the box into the little square over the bridge
-    if pressing_key is None:
+    if current_keys is None:
         return continuous_actions
     
     try:
-        if keyboard.KeyCode(char='w') in pressing_key:
+        if keyboard.KeyCode(char='w') in current_keys:
             continuous_actions[0] = 1
-        if keyboard.KeyCode(char='a') in pressing_key:
+        if keyboard.KeyCode(char='a') in current_keys:
             continuous_actions[1] = -1
-        if keyboard.KeyCode(char='s') in pressing_key:
+        if keyboard.KeyCode(char='s') in current_keys:
             continuous_actions[0] = -1
-        if keyboard.KeyCode(char='d') in pressing_key:
+        if keyboard.KeyCode(char='d') in current_keys:
             continuous_actions[1] = 1
 
-        if keyboard.KeyCode(char='1') in pressing_key:
+        if keyboard.KeyCode(char='1') in current_keys:
             continuous_actions[2] = 1
             continuous_actions[5] = 1
-        if keyboard.KeyCode(char='2') in pressing_key:
+        if keyboard.KeyCode(char='2') in current_keys:
             continuous_actions[10] = -0.1
             continuous_actions[14] = -0.1
-        if keyboard.KeyCode(char='3') in pressing_key:
+        if keyboard.KeyCode(char='3') in current_keys:
             continuous_actions[10] = 0.2
             continuous_actions[14] = 0.2
             continuous_actions[12] = -0.25

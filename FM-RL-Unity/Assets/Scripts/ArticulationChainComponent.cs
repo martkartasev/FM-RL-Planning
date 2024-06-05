@@ -17,12 +17,11 @@ public class ArticulationChainComponent : MonoBehaviour
     public ArticulationBody armR;
     public ArticulationBody forearmR;
     public ArticulationBody handR;
-    public ArticulationBody root => bodyParts[0];
+    public ArticulationBody root => hips;
 
     public void Awake()
     {
-        bodyParts = new List<ArticulationBody>();
-        bodyParts.Add(hips);
+        bodyParts.Insert(0, hips);
         bodyParts.Add(spine);
         bodyParts.Add(chest);
         bodyParts.Add(head);

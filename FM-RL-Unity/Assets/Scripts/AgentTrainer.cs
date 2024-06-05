@@ -1,3 +1,4 @@
+using System;
 using DefaultNamespace;
 using UnityEngine;
 using Unity.MLAgents;
@@ -23,7 +24,8 @@ public class AgentTrainer : Agent
     {
         m_chain = GetComponent<ArticulationChainComponent>();
         var decisionRequester = GetComponent<DecisionRequester>();
-        reward_norm_mult = 1f / MaxStep * (decisionRequester.TakeActionsBetweenDecisions ? 1f : decisionRequester.DecisionPeriod);
+        reward_norm_mult = 1f / MaxStep *
+                           (decisionRequester.TakeActionsBetweenDecisions ? 1f : decisionRequester.DecisionPeriod);
     }
 
 
@@ -32,6 +34,7 @@ public class AgentTrainer : Agent
     /// </summary>
     public override void OnEpisodeBegin()
     {
+        m_chain.root.immovable = true;
         m_chain.Restart(transform.parent.TransformPoint(Vector3.zero), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
 
         target.GetComponent<TargetPositionRandomizer>().Randomize();
@@ -59,7 +62,10 @@ public class AgentTrainer : Agent
 
         foreach (var bodyPart in m_chain.bodyParts)
         {
-            CollectObservationBodyPart(bodyPart, sensor);
+            if (!bodyPart.name.ToLower().Contains("wheel"))
+            {
+                CollectObservationBodyPart(bodyPart, sensor);
+            }
         }
     }
 
@@ -77,7 +83,8 @@ public class AgentTrainer : Agent
         sensor.AddObservation(referenceFrame.InverseTransformDirection(bp.velocity).NormalizeVector(5f));
         sensor.AddObservation(referenceFrame.InverseTransformDirection(bp.angularVelocity).NormalizeVector(5f));
         sensor.AddObservation(bp.transform.localRotation);
-        sensor.AddObservation(referenceFrame.InverseTransformDirection(bp.transform.position - m_chain.chest.transform.position).NormalizeVector(1.5f));
+        sensor.AddObservation(referenceFrame
+            .InverseTransformDirection(bp.transform.position - m_chain.chest.transform.position).NormalizeVector(1.5f));
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -138,7 +145,7 @@ public class AgentTrainer : Agent
         reward += rewarderBoxN.Reward() * reward_norm_mult;
         reward += rewarderRHand.Reward() * 0.5f * reward_norm_mult; // Only goes to one per episode anyway //*dot 
         reward += rewarderLHand.Reward() * 0.5f * reward_norm_mult; //*dot 
-        reward /= 5; 
+        reward /= 5;
 
         reward += -0.1f * reward_norm_mult; //Time penalty
         // Even smaller?
@@ -168,6 +175,11 @@ public class AgentTrainer : Agent
 
         //Vector3.Dot(leftHand, boxBaseVector) * Vector3.Dot(rightHand, boxBaseVector) *
         return -Vector3.Dot(rightHand, leftHand);
+    }
+
+    public void FixedUpdate()
+    {
+        if (m_chain.root.immovable) m_chain.root.immovable = false;
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
