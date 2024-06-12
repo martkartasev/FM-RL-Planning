@@ -86,9 +86,9 @@ public class AgentSimple : Agent
         }
     }
 
-    public void FixedUpdate()
+    private void ChangeCameraViewPort(int viewPort)
     {
-        if (Input.GetKey(KeyCode.Alpha1))
+        if (viewPort == 1)
         {
             eyeCamera.transform.gameObject.SetActive(true);
             thirdPersonCamera.transform.gameObject.SetActive(false);
@@ -96,7 +96,7 @@ public class AgentSimple : Agent
             topCamera.transform.gameObject.SetActive(false);
         }
 
-        if (Input.GetKey(KeyCode.Alpha2))
+        if (viewPort == 2)
         {
             eyeCamera.transform.gameObject.SetActive(false);
             thirdPersonCamera.transform.gameObject.SetActive(true);
@@ -104,7 +104,7 @@ public class AgentSimple : Agent
             topCamera.transform.gameObject.SetActive(false);
         }
 
-        if (Input.GetKey(KeyCode.Alpha3))
+        if (viewPort == 3)
         {
             eyeCamera.transform.gameObject.SetActive(false);
             thirdPersonCamera.transform.gameObject.SetActive(false);
@@ -112,7 +112,7 @@ public class AgentSimple : Agent
             topCamera.transform.gameObject.SetActive(false);
         }
 
-        if (Input.GetKey(KeyCode.Alpha4))
+        if (viewPort == 4)
         {
             eyeCamera.transform.gameObject.SetActive(false);
             thirdPersonCamera.transform.gameObject.SetActive(false);
@@ -126,8 +126,8 @@ public class AgentSimple : Agent
         var continuousActions = actionBuffers.ContinuousActions;
 
         ExecuteBehavior(continuousActions, actionBuffers.DiscreteActions[0]);
-
-        var resetSignal = actionBuffers.DiscreteActions[1];
+        ChangeCameraViewPort(actionBuffers.DiscreteActions[1]);
+        var resetSignal = actionBuffers.DiscreteActions[2];
         if (resetSignal == 1)
         {
             EndEpisode();
@@ -258,6 +258,26 @@ public class AgentSimple : Agent
 
         var actionsOutDiscreteActions = actionsOut.DiscreteActions;
         actionsOutDiscreteActions[0] = 1;
-        actionsOutDiscreteActions[1] = Input.GetKey("space") ? 1 : 0;
+        actionsOutDiscreteActions[2] = Input.GetKey("space") ? 1 : 0;
+
+        if (Input.GetKey(KeyCode.Alpha1))
+        {
+            actionsOutDiscreteActions[1] = 1;
+        }
+
+        if (Input.GetKey(KeyCode.Alpha2))
+        {
+            actionsOutDiscreteActions[1] = 2;
+        }
+
+        if (Input.GetKey(KeyCode.Alpha3))
+        {
+            actionsOutDiscreteActions[1] = 3;
+        }
+
+        if (Input.GetKey(KeyCode.Alpha4))
+        {
+            actionsOutDiscreteActions[1] = 4;
+        }
     }
 }

@@ -9,13 +9,16 @@ from mlagents_envs.side_channel.engine_configuration_channel import EngineConfig
 current_keys = set()
 
 pressing_key = None
+
+
 def on_press(key):
     # Add the key to the set of currently pressed keys
     current_keys.add(key)
-    
+
     global pressing_key
     # Convert the set to a frozenset for easy comparison
     pressing_key = frozenset(current_keys)
+
 
 def on_release(key):
     # Remove the key from the set of currently pressed keys
@@ -27,11 +30,11 @@ def produce_continuous_action(agent_obs):
     relative_target = agent_obs[0:3]
     relative_goal_pos = agent_obs[3:6]
 
-    continuous_actions = np.zeros(18)
+    continuous_actions = np.zeros(24)
     # You can try moving the box into the little square over the bridge
     if current_keys is None:
         return continuous_actions
-    
+
     try:
         if keyboard.KeyCode(char='w') in current_keys:
             continuous_actions[0] = 1
@@ -42,19 +45,24 @@ def produce_continuous_action(agent_obs):
         if keyboard.KeyCode(char='d') in current_keys:
             continuous_actions[1] = 1
 
-        if keyboard.KeyCode(char='1') in current_keys:
+        if keyboard.KeyCode(char='q') in current_keys:
+            continuous_actions[2] = -1
+        if keyboard.KeyCode(char='e') in current_keys:
             continuous_actions[2] = 1
-            continuous_actions[5] = 1
+
+        if keyboard.KeyCode(char='1') in current_keys:
+            continuous_actions[8] = 1
+            continuous_actions[11] = 1
         if keyboard.KeyCode(char='2') in current_keys:
-            continuous_actions[10] = -0.1
-            continuous_actions[14] = -0.1
+            continuous_actions[16] = -0.1
+            continuous_actions[20] = -0.1
         if keyboard.KeyCode(char='3') in current_keys:
-            continuous_actions[10] = 0.2
-            continuous_actions[14] = 0.2
-            continuous_actions[12] = -0.25
-            continuous_actions[16] = -0.25
-            continuous_actions[13] = -1
-            continuous_actions[17] = -1
+            continuous_actions[16] = 0.2
+            continuous_actions[20] = 0.2
+            continuous_actions[18] = -0.25
+            continuous_actions[22] = -0.25
+            continuous_actions[19] = -1
+            continuous_actions[23] = -1
 
 
     except Exception as e:
@@ -68,8 +76,17 @@ def produce_discrete_action(agent_obs):
     relative_target = agent_obs[0:3]
     relative_goal_pos = agent_obs[3:6]
 
-    agent_module = 0  # Enable a discrete module that will execute a skill
+    agent_module = 1  # Enable a discrete module that will execute a skill or change to a different set of behaviors
     reset_agent = 0  # 0 keeps going, 1 resets given agent
+    camera = 0
+    if keyboard.KeyCode(char='z') in current_keys:
+        camera = 1
+    if keyboard.KeyCode(char='x') in current_keys:
+        camera = 2
+    if keyboard.KeyCode(char='c') in current_keys:
+        camera = 3
+    if keyboard.KeyCode(char='v') in current_keys:
+        camera = 4
 
     try:
         if pressing_key == frozenset([keyboard.Key.space]):
@@ -78,7 +95,7 @@ def produce_discrete_action(agent_obs):
         print("Error pressing space:", e)
         pass
 
-    return [agent_module, reset_agent]
+    return [agent_module, camera, reset_agent]
 
 
 def run_env(example_env):
@@ -101,23 +118,26 @@ def run_env(example_env):
             # print(decision_steps.agent_id)
             action_tuple = ActionTuple()
             if nr_agents > 0:
-                observations = decision_steps.obs[0]  # Strange structure, but this is how you get the observations array
+                observations = decision_steps.obs[
+                    0]  # Strange structure, but this is how you get the observations array
                 discrete = np.array([produce_discrete_action(observations[i][:]) for i in range(nr_agents)])
                 cont = np.array([produce_continuous_action(observations[i][:]) for i in range(nr_agents)])
                 action_tuple.add_discrete(discrete)
                 action_tuple.add_continuous(cont)
             else:
-                action_tuple.add_continuous(np.zeros((0, 18)))
+                action_tuple.add_continuous(np.zeros((0, 24)))
                 action_tuple.add_discrete(np.zeros((0, 2)))
 
             example_env.set_actions(behavior_name, action_tuple)
             example_env.step()
         listener.join()
 
+
 # You can change viewports by clicking on the game window and using 1 2 3 4
 if __name__ == '__main__':
     engine = EngineConfigurationChannel()
-    engine.set_configuration_parameters(time_scale=1)  # Can speed up simulation between steps with this
+    engine.set_configuration_parameters(time_scale=1, width=800,
+                                        height=600)  # Can speed up simulation between steps with this
     engine.set_configuration_parameters(quality_level=0)
 
     # Get the current working directory
@@ -139,7 +159,7 @@ if __name__ == '__main__':
         raise ValueError(f"Unknown operating system: {system}")
 
     print(f"Executable path: {exe_file}")
-    
+
     env = UnityEnvironment(
         file_name=exe_file,
         no_graphics=False,  # Can disable graphics if needed
