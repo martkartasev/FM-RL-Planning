@@ -16,7 +16,8 @@ If you already cloned but forgot the tag use
 ```
 git submodule update --init --recursive
 ```
-*Note: change to http if ssh is blocked*
+*Note: change to http if ssh is blocked. Update git path with `git submodule sync`*
+
 
 ### Simple install
 To run the python example with a built version of the engine all you need is to install mlagents-envs and the keyboard module.
@@ -35,15 +36,9 @@ For this, I suggest having a dedicated python venv. Personally I am a big fan of
 Suggested python version is 3.10.12.
 
 ```
-conda create -n mlagents python=3.10.12 && conda activate mlagents
+conda create -n mlagents python=3.10.12 -y && conda activate mlagents
 
-pip3 install torch~=2.2.1 --index-url https://download.pytorch.org/whl/cu121
-
-pip install -e ./ml-agents/ml-agents-envs
-pip install -e ./ml-agents/ml-agents
-pip install transformers
-pip install accelerate
-pip install bitsandbytes
+pip install -r requirements.txt
 ```
 
 This install the mlagents version from your local directory. This is a version that is ahead of the current "released" branch, but has a few nice features, like Sentis.
