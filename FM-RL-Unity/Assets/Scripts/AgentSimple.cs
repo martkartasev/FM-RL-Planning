@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
+using UnityEngine.Serialization;
 
 public class AgentSimple : Agent
 {
@@ -17,15 +18,21 @@ public class AgentSimple : Agent
     private OnlyImprovingRewarder rewarderLHand;
     private OnlyImprovingRewarder rewarderRHand;
 
-    public ArticulationBody wheelVelL;
-    public ArticulationBody wheelYawL;
-    public ArticulationBody wheelVelR;
-    public ArticulationBody wheelYawR;
+    public ArticulationBody wheelYawLFront;
+    public ArticulationBody wheelYawRFront;
+    public ArticulationBody wheelYawLBack;
+    public ArticulationBody wheelYawRBack;
+
+    public ArticulationBody wheelVelLFront;
+    public ArticulationBody wheelVelRFront;
+    public ArticulationBody wheelVelLBack;
+    public ArticulationBody wheelVelRBack;
 
     public Camera eyeCamera;
     public Camera thirdPersonCamera;
     public Camera frontCamera;
     public Camera topCamera;
+
     public override void Initialize()
     {
         m_chain = GetComponent<ArticulationChainComponent>();
@@ -37,7 +44,7 @@ public class AgentSimple : Agent
     public override void OnEpisodeBegin()
     {
         m_chain.Restart(m_chain.hips.transform.parent.TransformPoint(new Vector3(0, 0.1f, 0)), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
-        
+
         target.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(m_chain.hips.transform);
     }
 
@@ -72,7 +79,10 @@ public class AgentSimple : Agent
 
         foreach (var bodyPart in m_chain.bodyParts)
         {
-            CollectObservationBodyPart(bodyPart, sensor);
+            if (!bodyPart.name.ToLower().Contains("wheel"))
+            {
+                CollectObservationBodyPart(bodyPart, sensor);
+            }
         }
     }
 
@@ -85,6 +95,7 @@ public class AgentSimple : Agent
             frontCamera.transform.gameObject.SetActive(false);
             topCamera.transform.gameObject.SetActive(false);
         }
+
         if (Input.GetKey(KeyCode.Alpha2))
         {
             eyeCamera.transform.gameObject.SetActive(false);
@@ -92,6 +103,7 @@ public class AgentSimple : Agent
             frontCamera.transform.gameObject.SetActive(false);
             topCamera.transform.gameObject.SetActive(false);
         }
+
         if (Input.GetKey(KeyCode.Alpha3))
         {
             eyeCamera.transform.gameObject.SetActive(false);
@@ -99,6 +111,7 @@ public class AgentSimple : Agent
             frontCamera.transform.gameObject.SetActive(true);
             topCamera.transform.gameObject.SetActive(false);
         }
+
         if (Input.GetKey(KeyCode.Alpha4))
         {
             eyeCamera.transform.gameObject.SetActive(false);
@@ -111,16 +124,82 @@ public class AgentSimple : Agent
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
         var continuousActions = actionBuffers.ContinuousActions;
-        var i = -1;
 
-        var forward = continuousActions[++i];
-        var turn = continuousActions[++i];
+        ExecuteBehavior(continuousActions, actionBuffers.DiscreteActions[0]);
 
-        wheelVelL.SetDriveTargetVelocity(ArticulationDriveAxis.X, forward*400);
-        wheelVelR.SetDriveTargetVelocity(ArticulationDriveAxis.X, forward*400);
-        
-        wheelYawL.SetDriveTarget(ArticulationDriveAxis.X, turn*15);
-        wheelYawR.SetDriveTarget(ArticulationDriveAxis.X, turn*15);
+        var resetSignal = actionBuffers.DiscreteActions[1];
+        if (resetSignal == 1)
+        {
+            EndEpisode();
+        }
+    }
+
+    private void ExecuteBehavior(ActionSegment<float> continuousActions, int i)
+    {
+        switch (i)
+        {
+            case 1:
+                SimplifiedControl(continuousActions);
+                break;
+            case 0:
+                LowLevelControl(continuousActions);
+                break;
+        }
+    }
+
+    private void SimplifiedControl(ActionSegment<float> continuousActions)
+    {
+        var forward = continuousActions[0];
+        var turn = continuousActions[1];
+        var rotate = continuousActions[2];
+        if (rotate != 0)
+        {
+            continuousActions[0] = rotate;
+            continuousActions[1] = rotate;
+            continuousActions[2] = -rotate;
+            continuousActions[3] = -rotate;
+            continuousActions[4] = 1;
+            continuousActions[5] = -1;
+            continuousActions[6] = -1;
+            continuousActions[7] = 1;
+        }
+
+        if (rotate == 0)
+        {
+            continuousActions[0] = forward;
+            continuousActions[1] = forward;
+            continuousActions[2] = forward;
+            continuousActions[3] = forward;
+            continuousActions[4] = 0.4f * turn;
+            continuousActions[5] = 0.4f * -turn;
+            continuousActions[6] = 0.4f * turn;
+            continuousActions[7] = 0.4f * -turn;
+        }
+
+        LowLevelControl(continuousActions);
+    }
+
+    private void LowLevelControl(ActionSegment<float> continuousActions)
+    {
+        int i = -1;
+        var forwardLF = continuousActions[++i];
+        var forwardLB = continuousActions[++i];
+        var forwardRF = continuousActions[++i];
+        var forwardRB = continuousActions[++i];
+        var turnLF = continuousActions[++i];
+        var turnLB = continuousActions[++i];
+        var turnRF = continuousActions[++i];
+        var turnRB = continuousActions[++i];
+
+        wheelVelLFront.SetDriveTargetVelocity(ArticulationDriveAxis.X, forwardLF * 400);
+        wheelVelRFront.SetDriveTargetVelocity(ArticulationDriveAxis.X, forwardRF * 400);
+        wheelVelLBack.SetDriveTargetVelocity(ArticulationDriveAxis.X, forwardLB * 400);
+        wheelVelRBack.SetDriveTargetVelocity(ArticulationDriveAxis.X, forwardRB * 400);
+
+        m_chain.DriveControllers[wheelYawLFront].SetDriveTargets(turnLF, 0, 0);
+        m_chain.DriveControllers[wheelYawRFront].SetDriveTargets(turnRF, 0, 0);
+        m_chain.DriveControllers[wheelYawLBack].SetDriveTargets(turnLB, 0, 0);
+        m_chain.DriveControllers[wheelYawRBack].SetDriveTargets(turnRB, 0, 0);
 
         m_chain.DriveControllers[m_chain.spine].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
         m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
@@ -133,22 +212,16 @@ public class AgentSimple : Agent
         m_chain.DriveControllers[m_chain.armR].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
         m_chain.DriveControllers[m_chain.forearmR].SetDriveTargets(continuousActions[++i], 0, 0);
         m_chain.DriveControllers[m_chain.handR].SetDriveTargets(0, continuousActions[++i], 0);
-
-        var resetSignal = actionBuffers.DiscreteActions[1];
-        if (resetSignal == 1)
-        {
-            EndEpisode();
-        }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
         var actions = actionsOut.ContinuousActions;
-        if (Input.GetKey("up"))
+        if (Input.GetKey("w"))
         {
             actions[0] = 1;
         }
-        else if (Input.GetKey("down"))
+        else if (Input.GetKey("s"))
         {
             actions[0] = -1;
         }
@@ -157,11 +230,11 @@ public class AgentSimple : Agent
             actions[0] = 0;
         }
 
-        if (Input.GetKey("left"))
+        if (Input.GetKey("a"))
         {
             actions[1] = -1;
         }
-        else if (Input.GetKey("right"))
+        else if (Input.GetKey("d"))
         {
             actions[1] = 1;
         }
@@ -170,8 +243,21 @@ public class AgentSimple : Agent
             actions[1] = 0;
         }
 
+        if (Input.GetKey("q"))
+        {
+            actions[2] = -1;
+        }
+        else if (Input.GetKey("e"))
+        {
+            actions[2] = 1;
+        }
+        else
+        {
+            actions[2] = 0;
+        }
+
         var actionsOutDiscreteActions = actionsOut.DiscreteActions;
-        actionsOutDiscreteActions[0] = 0;
+        actionsOutDiscreteActions[0] = 1;
         actionsOutDiscreteActions[1] = Input.GetKey("space") ? 1 : 0;
     }
 }
