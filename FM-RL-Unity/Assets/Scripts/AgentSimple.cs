@@ -1,14 +1,21 @@
 using System;
-using UnityEngine;
+using System.Runtime.CompilerServices;
+using DefaultNamespace;
+using Grpc.Core;
+using Ik;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
+using UnityEngine;
 using UnityEngine.Serialization;
+using Vector3 = UnityEngine.Vector3;
 
 public class AgentSimple : Agent
 {
     [Header("Target")] public Transform target; //Target the agent will try to grasp.
     [Header("Target Position")] public Transform targetPosition;
+    public Transform targetPositionL;
+    public Transform targetPositionR;
 
     private ArticulationChainComponent m_chain;
 
@@ -32,10 +39,33 @@ public class AgentSimple : Agent
     public Camera thirdPersonCamera;
     public Camera frontCamera;
     public Camera topCamera;
+    private KinematicsProvider.KinematicsProviderClient client;
+    private TaskAwaiter<IKResponse> angles_L;
+    private TaskAwaiter<IKResponse> angles_R;
 
     public override void Initialize()
     {
         m_chain = GetComponent<ArticulationChainComponent>();
+
+        var channel = new Channel("127.0.0.1:50051", ChannelCredentials.Insecure);
+        client = new KinematicsProvider.KinematicsProviderClient(channel);
+
+        var vector3 = new Ik.Vector3();
+        var baseVec = m_chain.chest.transform.InverseTransformPoint(targetPositionL.position);
+        vector3.X = baseVec.x;
+        vector3.Y = baseVec.y;
+        vector3.Z = baseVec.z;
+
+        var vector3R = new Ik.Vector3();
+        var baseVecR = m_chain.chest.transform.InverseTransformPoint(targetPositionR.position);
+        vector3R.X = baseVecR.x;
+        vector3R.Y = baseVecR.y;
+        vector3R.Z = baseVecR.z;
+
+        var response_L = client.CalculateInverseKinematicsLeftAsync(new IKRequest { Target = vector3, CurrentJoints = { m_chain.armL_yaw.xDrive.target, m_chain.armL_pitch.xDrive.target, m_chain.forearmL.xDrive.target, m_chain.handL.xDrive.target } });
+        var response_R = client.CalculateInverseKinematicsRightAsync(new IKRequest { Target = vector3R, CurrentJoints = { m_chain.armR_yaw.xDrive.target, m_chain.armR_pitch.xDrive.target, m_chain.forearmR.xDrive.target, m_chain.handR.xDrive.target } });
+        angles_L = response_L.GetAwaiter();
+        angles_R = response_R.GetAwaiter();
     }
 
     /// <summary>
@@ -196,6 +226,35 @@ public class AgentSimple : Agent
         wheelVelLBack.SetDriveTargetVelocity(ArticulationDriveAxis.X, forwardLB * 400);
         wheelVelRBack.SetDriveTargetVelocity(ArticulationDriveAxis.X, forwardRB * 400);
 
+        var vector3 = new Ik.Vector3();
+        var baseVec = m_chain.chest.transform.InverseTransformPoint(targetPositionL.position);
+        vector3.X = baseVec.x;
+        vector3.Y = baseVec.y;
+        vector3.Z = baseVec.z;
+
+        var vector3R = new Ik.Vector3();
+        var baseVecR = m_chain.chest.transform.InverseTransformPoint(targetPositionR.position);
+        vector3R.X = baseVecR.x;
+        vector3R.Y = baseVecR.y;
+        vector3R.Z = baseVecR.z;
+        
+        var r_response = angles_R.GetResult();
+        m_chain.DriveControllers[m_chain.armR_yaw].SetDriveTargetsUnnorm(r_response.JointTargets[0], 0, 0);
+        m_chain.DriveControllers[m_chain.armR_pitch].SetDriveTargetsUnnorm(r_response.JointTargets[1], 0, 0);
+        m_chain.DriveControllers[m_chain.forearmR].SetDriveTargetsUnnorm(r_response.JointTargets[2], 0, 0);
+        m_chain.DriveControllers[m_chain.handR].SetDriveTargetsUnnorm(r_response.JointTargets[3], 0, 0);
+
+        var l_response = angles_L.GetResult();
+        m_chain.DriveControllers[m_chain.armL_yaw].SetDriveTargetsUnnorm(l_response.JointTargets[0], 0, 0);
+        m_chain.DriveControllers[m_chain.armL_pitch].SetDriveTargetsUnnorm(l_response.JointTargets[1], 0, 0);
+        m_chain.DriveControllers[m_chain.forearmL].SetDriveTargetsUnnorm(l_response.JointTargets[2], 0, 0);
+        m_chain.DriveControllers[m_chain.handL].SetDriveTargetsUnnorm(l_response.JointTargets[3], 0, 0);
+
+        var response_L = client.CalculateInverseKinematicsLeftAsync(new IKRequest { Target = vector3, CurrentJoints = { m_chain.armL_yaw.xDrive.SafeTarget(), m_chain.armL_pitch.xDrive.SafeTarget(), m_chain.forearmL.xDrive.SafeTarget(), m_chain.handL.xDrive.SafeTarget()} });
+        var response_R = client.CalculateInverseKinematicsRightAsync(new IKRequest { Target = vector3R, CurrentJoints = { m_chain.armR_yaw.xDrive.SafeTarget(), m_chain.armR_pitch.xDrive.SafeTarget(), m_chain.forearmR.xDrive.SafeTarget(), m_chain.handR.xDrive.SafeTarget() } });
+        angles_L = response_L.GetAwaiter();
+        angles_R = response_R.GetAwaiter();
+
         m_chain.DriveControllers[wheelYawLFront].SetDriveTargets(turnLF, 0, 0);
         m_chain.DriveControllers[wheelYawRFront].SetDriveTargets(turnRF, 0, 0);
         m_chain.DriveControllers[wheelYawLBack].SetDriveTargets(turnLB, 0, 0);
@@ -204,14 +263,10 @@ public class AgentSimple : Agent
         m_chain.DriveControllers[m_chain.spine].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
         m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
         m_chain.DriveControllers[m_chain.head].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+    }
 
-        m_chain.DriveControllers[m_chain.armL].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
-        m_chain.DriveControllers[m_chain.forearmL].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.handL].SetDriveTargets(0, continuousActions[++i], 0);
-
-        m_chain.DriveControllers[m_chain.armR].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
-        m_chain.DriveControllers[m_chain.forearmR].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.handR].SetDriveTargets(0, continuousActions[++i], 0);
+    public void FixedUpdate()
+    {
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)

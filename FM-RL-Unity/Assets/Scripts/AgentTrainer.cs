@@ -103,14 +103,15 @@ public class AgentTrainer : Agent
         m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
         m_chain.DriveControllers[m_chain.head].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
 
-        m_chain.DriveControllers[m_chain.armL].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.armL_pitch].SetDriveTargets(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.armL_yaw].SetDriveTargets(continuousActions[++i], 0, 0);
         m_chain.DriveControllers[m_chain.forearmL].SetDriveTargets(continuousActions[++i], 0, 0);
         m_chain.DriveControllers[m_chain.handL].SetDriveTargets(0, continuousActions[++i], 0);
 
-        m_chain.DriveControllers[m_chain.armR].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.armR_pitch].SetDriveTargets(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.armR_yaw].SetDriveTargets(continuousActions[++i], 0, 0);
         m_chain.DriveControllers[m_chain.forearmR].SetDriveTargets(continuousActions[++i], 0, 0);
         m_chain.DriveControllers[m_chain.handR].SetDriveTargets(0, continuousActions[++i], 0);
-
         ////// Drive forces / strengths
         // m_chain.DriveControllers[m_chain.spine].SetDriveStrength(continuousActions[++i]);
         // m_chain.DriveControllers[m_chain.chest].SetDriveStrength(continuousActions[++i]);

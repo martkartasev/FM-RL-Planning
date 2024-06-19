@@ -11,10 +11,12 @@ public class ArticulationChainComponent : MonoBehaviour
     public ArticulationBody spine;
     public ArticulationBody chest;
     public ArticulationBody head;
-    public ArticulationBody armL;
+    public ArticulationBody armL_pitch;
+    public ArticulationBody armL_yaw;
     public ArticulationBody forearmL;
     public ArticulationBody handL;
-    public ArticulationBody armR;
+    public ArticulationBody armR_pitch;
+    public ArticulationBody armR_yaw;
     public ArticulationBody forearmR;
     public ArticulationBody handR;
     public ArticulationBody root => hips;
@@ -25,10 +27,12 @@ public class ArticulationChainComponent : MonoBehaviour
         bodyParts.Add(spine);
         bodyParts.Add(chest);
         bodyParts.Add(head);
-        bodyParts.Add(armL);
+        bodyParts.Add(armL_pitch);
+        bodyParts.Add(armL_yaw);
         bodyParts.Add(forearmL);
         bodyParts.Add(handL);
-        bodyParts.Add(armR);
+        bodyParts.Add(armR_pitch);
+        bodyParts.Add(armR_yaw);
         bodyParts.Add(forearmR);
         bodyParts.Add(handR);
 
@@ -62,6 +66,13 @@ public class ArticulationChainComponent : MonoBehaviour
             YParameters = DriveParameters.CreateParameters(articulationBody.yDrive);
             ZParameters = DriveParameters.CreateParameters(articulationBody.zDrive);
             this.articulationBody.GetJointForces(new List<float>());
+        }
+
+        public void SetDriveTargetsUnnorm(float x, float y, float z)
+        {
+            articulationBody.SetDriveTarget(ArticulationDriveAxis.X, x);
+            articulationBody.SetDriveTarget(ArticulationDriveAxis.Y, y);
+            articulationBody.SetDriveTarget(ArticulationDriveAxis.Z, z);
         }
 
         public void SetDriveTargets(float x, float y, float z)

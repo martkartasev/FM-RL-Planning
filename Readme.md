@@ -57,3 +57,10 @@ Similarly, for MAC
 cd <PATH_TO_YOUR_APP>/build.app/Contents/MacOS/
 chmod -R 777 FM-RL-Unity
 ```
+
+### Protocol buffers
+
+```
+ python -m grpc_tools.protoc -I./ --python_out=./ --pyi_out=./ --grpc_python_out=./ ./ik.proto
+ protoc -I ./ --csharp_out=./ --grpc_csharp_out=./ ./ik.proto
+```

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+
+package ik;
+
+service KinematicsProvider {
+  rpc CalculateInverseKinematicsRight (IKRequest) returns (IKResponse) {}
+  rpc CalculateInverseKinematicsLeft (IKRequest) returns (IKResponse) {}
+}
+
+message IKRequest {
+  Vector3 target = 1;
+  Vector3 rotation = 2;
+  repeated float currentJoints = 3;
+}
+
+message IKResponse {
+  repeated float jointTargets = 1;
+}
+
+message Vector3 {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
