@@ -1,0 +1,76 @@
+<?xml version="1.0" ?>
+<robot name="lifter">
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="3.5"/>
+      <inertia ixx="0.015" ixy="0.0" ixz="0.0" iyy="0.016" iyz="0.0" izz="0.01"/>
+    </inertial>
+  </link>
+  <link name="upper_arm_l_yaw">
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="2.8"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.006" iyz="0.0" izz="0.01"/>
+    </inertial>
+  </link>
+  <link name="upper_arm_l_pitch">
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="4.29"/>
+      <inertia ixx="0.13" ixy="0.0" ixz="0.0" iyy="0.13" iyz="0.0" izz="0.006"/>
+    </inertial>
+  </link>
+  <link name="lower_arm_l">
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="3.4"/>
+      <inertia ixx="0.017" ixy="0.0" ixz="0.0" iyy="0.014" iyz="0.0" izz="0.013"/>
+    </inertial>
+  </link>
+  <link name="hand_l">
+    <inertial>
+      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+      <mass value="2.8"/>
+      <inertia ixx="0.009" ixy="-0.01" ixz="0.0" iyy="0.034" iyz="0.0" izz="0.038"/>
+    </inertial>
+  </link>
+
+  <joint name="joint_1" type="revolute">
+    <parent link="base_link"/>
+    <child link="upper_arm_l_yaw"/>
+    <!--origin rpy="0.0 0.0 0.0" xyz="0.0 0.45 0.0"/-->
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.27 0.0"/>
+    <axis xyz="0.0 0.0 -1.0"/>
+    <limit effort="0.0" lower="-1.04719755" upper="2.82743339" velocity="0.0"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <joint name="joint_2" type="revolute">
+    <parent link="upper_arm_l_yaw"/>
+    <child link="upper_arm_l_pitch"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+    <axis xyz="1.0 0.0 0.0"/>
+    <limit effort="0.0" lower="-1.74532925" upper="1.74532925" velocity="0.0"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <joint name="joint_3" type="revolute">
+    <parent link="upper_arm_l_pitch"/>
+    <child link="lower_arm_l"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.388 0.0"/>
+    <axis xyz="0.0 0.0 -1.0"/>
+    <limit effort="0.0" lower="-1.57079633" upper="1.57079633" velocity="0.0"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+  <joint name="joint_4" type="revolute">
+    <parent link="lower_arm_l"/>
+    <child link="hand_l"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.37 0.0"/>
+    <axis xyz="0.0 0.0 1.0"/>
+    <limit effort="0.0" lower="-0.785398163" upper="1.57079633" velocity="0.0"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+
+</robot>

@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<robot name="lifter">
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="1E-07" />
+      <inertia ixx="0.0149999987334013" ixy="0" ixz="0" iyy="0.0160000007599592" iyz="0" izz="0.00999999977648258" />
+    </inertial>
+  </link>
+  <link name="upper_arm_l_yaw">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="2.7999999523" />
+      <inertia ixx="0.00999999977648258" ixy="0" ixz="0" iyy="0.00599999958649278" iyz="0" izz="0.00999999977648258" />
+    </inertial>
+  </link>
+  <link name="upper_arm_l_pitch">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="4.2899999619" />
+      <inertia ixx="0.129999995231628" ixy="0" ixz="0" iyy="0.129999995231628" iyz="0" izz="0.00599999958649278" />
+    </inertial>
+  </link>
+  <link name="lower_arm_l">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="3.4000000954" />
+      <inertia ixx="0.017000000923872" ixy="0" ixz="0" iyy="0.0140000013634562" iyz="0" izz="0.0130000002682209" />
+    </inertial>
+  </link>
+  <link name="hand_l">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="2.7999999523" />
+      <inertia ixx="0.00899999868124723" ixy="-0.00999999325722456" ixz="3.30831084749406E-10" iyy="0.0339999869465828" iyz="4.57666127218204E-10" izz="0.0380000211298466" />
+    </inertial>
+  </link>
+  <joint name="lifter_base_link_joint" type="fixed">
+    <parent link="lifter" />
+    <child link="base_link" />
+  </joint>
+  <joint name="joint_1" type="revolute">
+    <origin rpy="0 0 -1.46807" xyz="0.179051 0.288458 0" />
+    <parent link="base_link" />
+    <child link="upper_arm_l_yaw" />
+    <limit lower="-1.04719754308462" upper="2.82743336632848" effort="2000" velocity="7" />
+  </joint>
+  <joint name="joint_2" type="revolute">
+    <origin rpy="-5.989784 0 0" xyz="0 -0.007692 0.052058" />
+    <parent link="upper_arm_l_yaw" />
+    <child link="upper_arm_l_pitch" />
+    <limit lower="-1.74532923847437" upper="1.74532923847437" effort="2000" velocity="7" />
+  </joint>
+  <joint name="joint_3" type="revolute">
+    <origin rpy="0 0 -0.551905" xyz="0.08389 0.364244 0" />
+    <parent link="upper_arm_l_pitch" />
+    <child link="lower_arm_l" />
+    <limit lower="-1.57079631462693" upper="1.57079631462693" effort="2000" velocity="7" />
+  </joint>
+  <joint name="joint_4" type="revolute">
+    <origin rpy="1.3E-05 1.2E-05 -0.785487" xyz="0.042429 0.237422 1E-06" />
+    <parent link="lower_arm_l" />
+    <child link="hand_l" />
+    <limit lower="-0.785398157313466" upper="1.57079631462693" effort="2000" velocity="7" />
+  </joint>
+</robot>
