@@ -45,6 +45,8 @@ This install the mlagents version from your local directory. This is a version t
 
 For more details see https://github.com/Unity-Technologies/ml-agents/blob/develop/docs/Installation.md
 
+Unpack the Plugins.zip package into the Assets folder in the Unity project to ensure full GRPC support.
+
 ### Permission issue
 In case the executable cannot be run on linux, it can be the fact that there is a permission restriction. Run the following to the files:
 ```

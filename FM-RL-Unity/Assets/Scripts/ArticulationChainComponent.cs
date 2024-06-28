@@ -68,18 +68,18 @@ public class ArticulationChainComponent : MonoBehaviour
             this.articulationBody.GetJointForces(new List<float>());
         }
 
-        public void SetDriveTargetsUnnorm(float x, float y, float z)
+        public void SetDriveTargets(float x, float y, float z)
         {
             articulationBody.SetDriveTarget(ArticulationDriveAxis.X, x);
             articulationBody.SetDriveTarget(ArticulationDriveAxis.Y, y);
             articulationBody.SetDriveTarget(ArticulationDriveAxis.Z, z);
         }
 
-        public void SetDriveTargets(float x, float y, float z)
+        public void SetDriveTargetsNorm(float x, float y, float z)
         {
-            articulationBody.SetDriveTarget(ArticulationDriveAxis.X, ComputeNormalizedDriveTarget(XParameters, x));
-            articulationBody.SetDriveTarget(ArticulationDriveAxis.Y, ComputeNormalizedDriveTarget(YParameters, y));
-            articulationBody.SetDriveTarget(ArticulationDriveAxis.Z, ComputeNormalizedDriveTarget(ZParameters, z));
+            articulationBody.SetDriveTarget(ArticulationDriveAxis.X, ComputeFromNormalizedDriveTarget(XParameters, x));
+            articulationBody.SetDriveTarget(ArticulationDriveAxis.Y, ComputeFromNormalizedDriveTarget(YParameters, y));
+            articulationBody.SetDriveTarget(ArticulationDriveAxis.Z, ComputeFromNormalizedDriveTarget(ZParameters, z));
         }
 
         public void ResetArticulationBody()
@@ -109,25 +109,30 @@ public class ArticulationChainComponent : MonoBehaviour
 
         public void SetDriveStrength(float x)
         {
-            SetDriveStrengths(x, x, x);
+            SetDriveStrengthsNorm(x, x, x);
         }
 
-        public void SetDriveStrengths(float x, float y, float z)
+        public void SetDriveStrengthsNorm(float x, float y, float z)
         {
-            articulationBody.SetDriveForceLimit(ArticulationDriveAxis.X, ComputeNormalizedDriveStrength(XParameters, x));
-            articulationBody.SetDriveForceLimit(ArticulationDriveAxis.Y, ComputeNormalizedDriveStrength(YParameters, y));
-            articulationBody.SetDriveForceLimit(ArticulationDriveAxis.Z, ComputeNormalizedDriveStrength(ZParameters, z));
+            articulationBody.SetDriveForceLimit(ArticulationDriveAxis.X, ComputeFromNormalizedDriveStrength(XParameters, x));
+            articulationBody.SetDriveForceLimit(ArticulationDriveAxis.Y, ComputeFromNormalizedDriveStrength(YParameters, y));
+            articulationBody.SetDriveForceLimit(ArticulationDriveAxis.Z, ComputeFromNormalizedDriveStrength(ZParameters, z));
         }
 
 
-        public float ComputeNormalizedDriveTarget(DriveParameters drive, float actionValue)
+        public float ComputeNormalizedDriveTarget(DriveParameters drive, float unnormalized)
         {
-            return drive.lowerLimit + (actionValue + 1) / 2 * (drive.upperLimit - drive.lowerLimit);
+            return 2 * ((unnormalized - drive.lowerLimit) / (drive.upperLimit - drive.lowerLimit)) -1;
         }
 
-        public float ComputeNormalizedDriveStrength(DriveParameters drive, float actionValue)
+        public float ComputeFromNormalizedDriveTarget(DriveParameters drive, float normalized)
         {
-            return (actionValue + 1f) * 0.5f * drive.forceLimit;
+            return drive.lowerLimit + (normalized + 1) / 2 * (drive.upperLimit - drive.lowerLimit);
+        }
+
+        public float ComputeFromNormalizedDriveStrength(DriveParameters drive, float normalized)
+        {
+            return (normalized + 1f) * 0.5f * drive.forceLimit;
         }
     }
 

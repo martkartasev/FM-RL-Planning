@@ -99,19 +99,19 @@ public class AgentTrainer : Agent
         var continuousActions = actionBuffers.ContinuousActions;
         var i = -1;
 
-        m_chain.DriveControllers[m_chain.spine].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.chest].SetDriveTargets(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
-        m_chain.DriveControllers[m_chain.head].SetDriveTargets(continuousActions[++i], continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.spine].SetDriveTargetsNorm(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.chest].SetDriveTargetsNorm(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.head].SetDriveTargetsNorm(continuousActions[++i], continuousActions[++i], 0);
 
-        m_chain.DriveControllers[m_chain.armL_pitch].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.armL_yaw].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.forearmL].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.handL].SetDriveTargets(0, continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.armL_pitch].SetDriveTargetsNorm(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.armL_yaw].SetDriveTargetsNorm(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.forearmL].SetDriveTargetsNorm(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.handL].SetDriveTargetsNorm(0, continuousActions[++i], 0);
 
-        m_chain.DriveControllers[m_chain.armR_pitch].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.armR_yaw].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.forearmR].SetDriveTargets(continuousActions[++i], 0, 0);
-        m_chain.DriveControllers[m_chain.handR].SetDriveTargets(0, continuousActions[++i], 0);
+        m_chain.DriveControllers[m_chain.armR_pitch].SetDriveTargetsNorm(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.armR_yaw].SetDriveTargetsNorm(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.forearmR].SetDriveTargetsNorm(continuousActions[++i], 0, 0);
+        m_chain.DriveControllers[m_chain.handR].SetDriveTargetsNorm(0, continuousActions[++i], 0);
         ////// Drive forces / strengths
         // m_chain.DriveControllers[m_chain.spine].SetDriveStrength(continuousActions[++i]);
         // m_chain.DriveControllers[m_chain.chest].SetDriveStrength(continuousActions[++i]);

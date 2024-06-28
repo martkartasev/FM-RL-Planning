@@ -403,9 +403,15 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   target: {fileID: 708398869478706826}
-  targetPosition: {fileID: 708398869478706826}
-  targetPositionL: {fileID: 708398869478706826}
-  targetPositionR: {fileID: 3756869934856650636}
+  targetPosition: {fileID: 0}
+  positionArmL: {fileID: 708398869478706826}
+  positionArmR: {fileID: 3756869934856650636}
+  positionRampTopR: {fileID: 0}
+  positionRampBottomR: {fileID: 0}
+  positionRampTopL: {fileID: 0}
+  positionRampBottomL: {fileID: 0}
+  positionBridgeNear: {fileID: 0}
+  positionBridgeFar: {fileID: 0}
   wheelYawLFront: {fileID: 4781637485778684581}
   wheelYawRFront: {fileID: 5097165251837202276}
   wheelYawLBack: {fileID: 5618246067891177579}
@@ -640,7 +646,7 @@ Transform:
   m_GameObject: {fileID: 604648050717768199}
   serializedVersion: 2
   m_LocalRotation: {x: 0.36581674, y: -0, z: -0, w: 0.93068695}
-  m_LocalPosition: {x: -0.07, y: 1.3970001, z: 0}
+  m_LocalPosition: {x: 0.006, y: 1.318, z: 0.122}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -731,7 +737,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3111073853458041936}
   m_Layer: 0
-  m_Name: palm_L
+  m_Name: palm_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1564,7 +1570,7 @@ GameObject:
   - component: {fileID: 5080824894326899798}
   - component: {fileID: 4664610528428561234}
   m_Layer: 0
-  m_Name: TargetPosition_L
+  m_Name: ArmPosition_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1600,7 +1606,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1522828856839841439}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -1661,7 +1667,7 @@ GameObject:
   - component: {fileID: 304381867890785927}
   - component: {fileID: 2281101214826579268}
   m_Layer: 0
-  m_Name: upper_arm_L_yaw (1)
+  m_Name: upper_arm_R_yaw
   m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2115,7 +2121,7 @@ GameObject:
   - component: {fileID: 2009756057386614553}
   - component: {fileID: 1327713541187273537}
   m_Layer: 0
-  m_Name: lower_arm_LMesh
+  m_Name: lower_arm_RMesh
   m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3218,7 +3224,7 @@ GameObject:
   - component: {fileID: 50923561751133910}
   - component: {fileID: 7665197801751173972}
   m_Layer: 7
-  m_Name: lower_arm_L
+  m_Name: lower_arm_R
   m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3704,7 +3710,7 @@ GameObject:
   - component: {fileID: 8888126773326040570}
   - component: {fileID: 6209386007243365264}
   m_Layer: 7
-  m_Name: hand_L
+  m_Name: hand_R
   m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3775,7 +3781,7 @@ ArticulationBody:
     upperLimit: 90
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 1
     target: 0
     targetVelocity: 0
     driveType: 0
@@ -5084,7 +5090,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6296159029275302612}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -5232,7 +5238,7 @@ GameObject:
   - component: {fileID: 229499646436298088}
   - component: {fileID: 12125054615474685}
   m_Layer: 7
-  m_Name: upper_arm_L_pitch
+  m_Name: upper_arm_R_pitch
   m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5373,7 +5379,7 @@ GameObject:
   - component: {fileID: 2532674953816550146}
   - component: {fileID: 463202599854703829}
   m_Layer: 0
-  m_Name: upper_arm_LMesh
+  m_Name: upper_arm_RMesh
   m_TagString: agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6764,7 +6770,7 @@ ArticulationBody:
     upperLimit: 90
     stiffness: 40000
     damping: 5000
-    forceLimit: 20000
+    forceLimit: 1
     target: 0
     targetVelocity: 0
     driveType: 0
