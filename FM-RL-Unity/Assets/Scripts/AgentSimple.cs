@@ -54,6 +54,12 @@ public class AgentSimple : Agent
     private TaskAwaiter<IKResponse> angles_L;
     private TaskAwaiter<IKResponse> angles_R;
 
+    public float spineValue;
+    public float handLValue;
+    public float handRValue;
+    public float forwardValue;
+    public float turnValue;
+
     public override void Initialize()
     {
         m_chain = GetComponent<ArticulationChainComponent>();
@@ -82,7 +88,7 @@ public class AgentSimple : Agent
     {
         m_chain.Restart(m_chain.hips.transform.parent.TransformPoint(new Vector3(0, 0.1f, 0)), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
 
-        target.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(m_chain.hips.transform);
+        // target.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(m_chain.hips.transform);
     }
 
     /// <summary>
@@ -193,6 +199,16 @@ public class AgentSimple : Agent
         var armR = new Vector3(continuousActions[3], continuousActions[4], continuousActions[5]);
         var armL = new Vector3(continuousActions[6], continuousActions[7], continuousActions[8]);
 
+        if (turnValue != 0.0f)
+        {
+            rotate = turnValue;
+        }
+
+        if (forwardValue != 0.0f)
+        {
+            forward = forwardValue;
+        }
+        
         if (rotate != 0)
         {
             continuousActions[0] = rotate;
@@ -251,6 +267,13 @@ public class AgentSimple : Agent
             CurrentJoints = {m_chain.armL_yaw.xDrive.SafeTarget(), m_chain.armL_pitch.xDrive.SafeTarget(), m_chain.forearmL.xDrive.SafeTarget(), m_chain.handL.xDrive.SafeTarget()}
         }).GetAwaiter();
 
+        if (spineValue != 0.0f && handLValue != 0.0f && handRValue != 0.0f)
+        {
+            continuousActions[16] = spineValue;
+            continuousActions[11] = handLValue;
+            continuousActions[15] = handRValue;
+        }
+
         LowLevelControl(continuousActions);
     }
 
@@ -286,7 +309,7 @@ public class AgentSimple : Agent
         m_chain.DriveControllers[m_chain.forearmL].SetDriveTargetsNorm(continuousActions[++i], 0, 0);
         m_chain.DriveControllers[m_chain.handL].SetDriveTargetsNorm(continuousActions[++i], 0, 0);
 
-        m_chain.DriveControllers[m_chain.spine].SetDriveTargetsNorm(0.3f, continuousActions[++i], continuousActions[++i]);
+        m_chain.DriveControllers[m_chain.spine].SetDriveTargetsNorm(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
         m_chain.DriveControllers[m_chain.chest].SetDriveTargetsNorm(continuousActions[++i], continuousActions[++i], continuousActions[++i]);
         m_chain.DriveControllers[m_chain.head].SetDriveTargetsNorm(continuousActions[++i], continuousActions[++i], 0);
     }
@@ -332,14 +355,14 @@ public class AgentSimple : Agent
         {
             actions[2] = 0;
         }
-        
+
         actions[3] = positionArmR.localPosition.x;
         actions[4] = positionArmR.localPosition.y;
         actions[5] = positionArmR.localPosition.z;
         actions[6] = positionArmL.localPosition.x;
         actions[7] = positionArmL.localPosition.y;
         actions[8] = positionArmL.localPosition.z;
-        
+
         var actionsOutDiscreteActions = actionsOut.DiscreteActions;
         actionsOutDiscreteActions[0] = 1;
         actionsOutDiscreteActions[2] = Input.GetKey("space") ? 1 : 0;
@@ -363,7 +386,6 @@ public class AgentSimple : Agent
         {
             actionsOutDiscreteActions[1] = 4;
         }
-
     }
 
 
