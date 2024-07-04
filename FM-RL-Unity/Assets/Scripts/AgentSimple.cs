@@ -54,6 +54,9 @@ public class AgentSimple : Agent
     private TaskAwaiter<IKResponse> angles_L;
     private TaskAwaiter<IKResponse> angles_R;
 
+    public MoveToSkill moveToSkill;
+    public PickSkill pickSkill;
+
     public float spineValue;
     public float handLValue;
     public float handRValue;
@@ -169,19 +172,26 @@ public class AgentSimple : Agent
     {
         var continuousActions = actionBuffers.ContinuousActions;
 
-        ExecuteBehavior(continuousActions, actionBuffers.DiscreteActions[0]);
-        ChangeCameraViewPort(actionBuffers.DiscreteActions[1]);
-        var resetSignal = actionBuffers.DiscreteActions[2];
+        ExecuteBehavior(continuousActions, actionBuffers.DiscreteActions[0],
+            actionBuffers.DiscreteActions[1], 
+            actionBuffers.DiscreteActions[2]);
+        ChangeCameraViewPort(actionBuffers.DiscreteActions[3]);
+        var resetSignal = actionBuffers.DiscreteActions[4];
         if (resetSignal == 1)
         {
             EndEpisode();
         }
     }
 
-    private void ExecuteBehavior(ActionSegment<float> continuousActions, int i)
+    private void ExecuteBehavior(ActionSegment<float> continuousActions, int behaviorType, int moveToTarget, int pickTarget)
     {
-        switch (i)
+        switch (behaviorType)
         {
+            case 2:
+                MoveToSkillControl(moveToTarget);
+                PickSkillControl(pickTarget);
+                SimplifiedControl(continuousActions);
+                break;
             case 1:
                 SimplifiedControl(continuousActions);
                 break;
@@ -189,6 +199,50 @@ public class AgentSimple : Agent
                 LowLevelControl(continuousActions);
                 break;
         }
+    }
+
+    private void MoveToSkillControl(int targetObject)
+    {
+        var targetTransform = IdentifierToTransform(targetObject);
+        if (targetTransform != null)
+        {
+            if (!moveToSkill.enabled) moveToSkill.enabled = enabled;
+            moveToSkill.targetPosition = targetTransform;
+        }
+        else
+        {
+            moveToSkill.enabled = false;
+        }
+    }
+
+    private void PickSkillControl(int targetObject)
+    {
+        var targetTransform = IdentifierToTransform(targetObject);
+        if (targetObject != 9 && targetTransform != null)
+        {
+            if (!pickSkill.enabled) pickSkill.enabled = enabled;
+            pickSkill.target = targetTransform;
+        }
+        else if (targetObject == 9)
+        {
+            pickSkill.enabled = false;
+        }
+    }
+
+    public Transform IdentifierToTransform(int targetObject)
+    {
+        return targetObject switch
+        {
+            8 => positionRampTopR,
+            7 => positionRampBottomR,
+            6 => positionRampTopL,
+            5 => positionRampBottomL,
+            4 => positionBridgeFar,
+            3 => positionBridgeNear,
+            2 => targetPosition,
+            1 => target,
+            _ => null
+        };
     }
 
     private void SimplifiedControl(ActionSegment<float> continuousActions)
@@ -208,7 +262,7 @@ public class AgentSimple : Agent
         {
             forward = forwardValue;
         }
-        
+
         if (rotate != 0)
         {
             continuousActions[0] = rotate;

@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -13,7 +16,7 @@ namespace DefaultNamespace
 
         private void FixedUpdate()
         {
-            if ((hips.position - targetPosition.position).magnitude > 0.7f)
+            if ((hips.position - targetPosition.position).magnitude > 0.9f)
             {
                 var relativeTarget = targetPosition.position - hips.position;
                 relativeTarget.y = 0;
