@@ -12,12 +12,13 @@ namespace DefaultNamespace
         public Transform hips;
         public Transform targetPosition;
         public AgentSimple agent;
-
+        public bool done;
 
         private void FixedUpdate()
         {
             if ((hips.position - targetPosition.position).magnitude > 0.9f)
             {
+                done = false;
                 var relativeTarget = targetPosition.position - hips.position;
                 relativeTarget.y = 0;
                 var angle = Vector3.SignedAngle(relativeTarget.normalized, hips.forward, Vector3.up);
@@ -34,6 +35,7 @@ namespace DefaultNamespace
             }
             else
             {
+                done = true;
                 agent.turnValue = 0.0f;
                 agent.forwardValue = 0.0f;
             }

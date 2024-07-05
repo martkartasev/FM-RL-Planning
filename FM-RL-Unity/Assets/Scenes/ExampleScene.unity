@@ -766,6 +766,7 @@ MonoBehaviour:
   hips: {fileID: 232331789}
   targetPosition: {fileID: 1820203190}
   agent: {fileID: 2058209394}
+  done: 0
 --- !u!114 &2058209399 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 9059974020517734718, guid: ac45e01e52e412247b163df8463f8b34, type: 3}
@@ -872,6 +873,10 @@ PrefabInstance:
     - target: {fileID: 1066113406076651054, guid: ac45e01e52e412247b163df8463f8b34, type: 3}
       propertyPath: m_ParentAnchorPosition.z
       value: -0.24900016
+      objectReference: {fileID: 0}
+    - target: {fileID: 1358669567520647150, guid: ac45e01e52e412247b163df8463f8b34, type: 3}
+      propertyPath: m_BrainParameters.VectorObservationSize
+      value: 32
       objectReference: {fileID: 0}
     - target: {fileID: 1358669567520647150, guid: ac45e01e52e412247b163df8463f8b34, type: 3}
       propertyPath: m_BrainParameters.m_ActionSpec.BranchSizes.Array.size

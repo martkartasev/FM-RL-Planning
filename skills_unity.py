@@ -43,14 +43,24 @@ def produce_discrete_action(agent_obs):
     ramp_r_top_pos = agent_obs[21:24]
     bridge_far_pos = agent_obs[24:27]
     bridge_near_pos = agent_obs[27:30]
+    move_to_done = agent_obs[30]
+    pick_done = agent_obs[31]
 
     agent_module = Module.SkillBasedControl.value
     pick_target = Position.NoTarget.value
     move_target = Position.Box.value
 
-    if np.linalg.norm(box_pos) < 1.1:
+    if np.linalg.norm(box_pos) < 1.5 and move_to_done == 1:
         move_target = Position.NoTarget.value
         pick_target = Position.Box.value
+
+    if np.linalg.norm(np.array(box_pos) - np.array(hand_l_pos)) < 0.2 and pick_done == 1:
+        pick_target = Position.Box.value
+        move_target = Position.Goal.value
+
+    if np.linalg.norm(goal_pos) < 1.5 and move_to_done == 1:
+        move_target = Position.NoTarget.value
+        pick_target = Position.ForceStopgit st.value
 
     camera = 2
     reset_agent = 0

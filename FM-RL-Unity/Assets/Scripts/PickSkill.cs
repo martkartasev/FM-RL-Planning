@@ -20,6 +20,7 @@ namespace DefaultNamespace
         private float distanceSide;
         private int counter = 0;
         private int stepLength;
+        public bool done;
 
         private void Start()
         {
@@ -58,6 +59,7 @@ namespace DefaultNamespace
             counter++;
             if (counter < stepLength)
             {
+                done = false;
                 agent.spineValue = 0.5f;
                 rightArmDesiredPosition = new Vector3(0.30f, 0.05f, 0.5f);
                 leftArmDesiredPosition = new Vector3(-0.30f, 0.05f, 0.5f);
@@ -85,6 +87,7 @@ namespace DefaultNamespace
             if (counter > stepLength * 4)
             {
                 agent.spineValue = 0.0f;
+                done = true;
             }
             else
             {

@@ -131,6 +131,9 @@ public class AgentSimple : Agent
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionRampTopR.transform.position));
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionBridgeFar.transform.position));
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionBridgeNear.transform.position));
+        
+        sensor.AddObservation(moveToSkill.done ? 1 : 0);
+        sensor.AddObservation(pickSkill.done ? 1 : 0);
     }
 
     private void ChangeCameraViewPort(int viewPort)
@@ -307,8 +310,8 @@ public class AgentSimple : Agent
         driveController = m_chain.DriveControllers[m_chain.handL];
         continuousActions[15] = driveController.ComputeNormalizedDriveTarget(driveController.XParameters, lResponse.JointTargets[3]);
 
-        positionArmR.localPosition = armR;
-        positionArmL.localPosition = armL;
+        if(armR != Vector3.zero) positionArmR.localPosition = armR;
+        if(armL != Vector3.zero) positionArmL.localPosition = armL;
 
         angles_R = client.CalculateInverseKinematicsRightAsync(new IKRequest
         {
