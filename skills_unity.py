@@ -60,7 +60,7 @@ def produce_discrete_action(agent_obs):
 
     if np.linalg.norm(goal_pos) < 1.5 and move_to_done == 1:
         move_target = Position.NoTarget.value
-        pick_target = Position.ForceStopgit st.value
+        pick_target = Position.ForceStop.value
 
     camera = 2
     reset_agent = 0
