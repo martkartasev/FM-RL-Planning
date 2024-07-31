@@ -54,7 +54,8 @@ class SkillBasedEnv:
 
         self.plans = PlanModule()
         # self.plans.query("There are some boxes that are away from the agent. I want the yellow box to be moved to the goal!")
-        self.plans.query("There are some boxes that are away from the agent. I want the yellow box to be moved to the goal! After that is done, I also want the red box to be moved to the goal!")
+        self.plans.query(
+            "There are some boxes that are away from the agent. I want the yellow box to be moved to the goal! After that is done, I also want the red box to be moved to the goal!")
 
         try:
             exe_file = exe_paths[system]
@@ -122,7 +123,8 @@ class SkillBasedEnv:
 
         self.actions = self.parse_plan()
 
-        current_action_done = move_to_done if self.current_action == "Move To" else (pick_done if self.current_action == "Grasp" else 1)
+        current_action_done = move_to_done if self.current_action == "Move To" else (
+            pick_done if self.current_action == "Grasp" else 1)
 
         if current_action_done:
             if self.current_action == "Move To":
@@ -139,9 +141,10 @@ class SkillBasedEnv:
             self.pick_target = Position.ForceStop
 
         agent_module = Module.SkillBasedControl.value
-        camera = 2
+        camera = 1  # 0 - no change, 1 - Isometric, 2 - Third person behind, 3 - Third Person front
         reset_agent = 0
-        return [agent_module, self.move_target.value, self.pick_target.value, camera, reset_agent]
+        screenshot = 3  # 0 - no screenshot saved, 1 - eyes only, 2 - map only, 3 - both
+        return [agent_module, self.move_target.value, self.pick_target.value, camera, reset_agent, screenshot]
 
     def parse_action(self, actions):
         if len(actions) > 0:

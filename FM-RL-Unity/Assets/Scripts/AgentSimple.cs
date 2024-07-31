@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using DefaultNamespace;
 using Grpc.Core;
@@ -50,6 +51,7 @@ public class AgentSimple : Agent
 
     public Camera eyeCamera;
     public Camera thirdPersonCamera;
+    public Camera isoThirdPersonCamera;
     public Camera frontCamera;
     public Camera topCamera;
     private KinematicsProvider.KinematicsProviderClient client;
@@ -65,6 +67,8 @@ public class AgentSimple : Agent
     public float forwardValue;
     public float turnValue;
 
+    private float lastScreenShot = -100.0f;
+
     public override void Initialize()
     {
         m_chain = GetComponent<ArticulationChainComponent>();
@@ -75,16 +79,19 @@ public class AgentSimple : Agent
         angles_R = client.CalculateInverseKinematicsRightAsync(new IKRequest
         {
             Target = PrepareEndEffectorGrpcQuery(positionArmR.position),
-            CurrentJoints = {m_chain.armR_yaw.xDrive.target, m_chain.armR_pitch.xDrive.target, m_chain.forearmR.xDrive.target, m_chain.handR.xDrive.target}
+            CurrentJoints = { m_chain.armR_yaw.xDrive.target, m_chain.armR_pitch.xDrive.target, m_chain.forearmR.xDrive.target, m_chain.handR.xDrive.target }
         }).GetAwaiter();
 
         angles_L = client.CalculateInverseKinematicsLeftAsync(new IKRequest
         {
             Target = PrepareEndEffectorGrpcQuery(positionArmL.position),
-            CurrentJoints = {m_chain.armL_yaw.xDrive.target, m_chain.armL_pitch.xDrive.target, m_chain.forearmL.xDrive.target, m_chain.handL.xDrive.target}
+            CurrentJoints = { m_chain.armL_yaw.xDrive.target, m_chain.armL_pitch.xDrive.target, m_chain.forearmL.xDrive.target, m_chain.handL.xDrive.target }
         }).GetAwaiter();
+
+        ChangeCameraViewPort(1);
+        ManageScreenShots(3);
     }
-    
+
     public override void OnEpisodeBegin()
     {
         m_chain.Restart(m_chain.hips.transform.parent.TransformPoint(new Vector3(0, 0.1f, 0)), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
@@ -105,7 +112,7 @@ public class AgentSimple : Agent
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionRampTopR.transform.position));
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionBridgeFar.transform.position));
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionBridgeNear.transform.position));
-        
+
         sensor.AddObservation(moveToSkill.done ? 1 : 0);
         sensor.AddObservation(pickSkill.done ? 1 : 0);
     }
@@ -114,34 +121,23 @@ public class AgentSimple : Agent
     {
         if (viewPort == 1)
         {
-            eyeCamera.transform.gameObject.SetActive(true);
+            isoThirdPersonCamera.transform.gameObject.SetActive(true);
             thirdPersonCamera.transform.gameObject.SetActive(false);
             frontCamera.transform.gameObject.SetActive(false);
-            topCamera.transform.gameObject.SetActive(false);
         }
 
         if (viewPort == 2)
         {
-            eyeCamera.transform.gameObject.SetActive(false);
+            isoThirdPersonCamera.transform.gameObject.SetActive(false);
             thirdPersonCamera.transform.gameObject.SetActive(true);
             frontCamera.transform.gameObject.SetActive(false);
-            topCamera.transform.gameObject.SetActive(false);
         }
 
         if (viewPort == 3)
         {
-            eyeCamera.transform.gameObject.SetActive(false);
+            isoThirdPersonCamera.transform.gameObject.SetActive(false);
             thirdPersonCamera.transform.gameObject.SetActive(false);
             frontCamera.transform.gameObject.SetActive(true);
-            topCamera.transform.gameObject.SetActive(false);
-        }
-
-        if (viewPort == 4)
-        {
-            eyeCamera.transform.gameObject.SetActive(false);
-            thirdPersonCamera.transform.gameObject.SetActive(false);
-            frontCamera.transform.gameObject.SetActive(false);
-            topCamera.transform.gameObject.SetActive(true);
         }
     }
 
@@ -150,10 +146,12 @@ public class AgentSimple : Agent
         var continuousActions = actionBuffers.ContinuousActions;
 
         ExecuteBehavior(continuousActions, actionBuffers.DiscreteActions[0],
-            actionBuffers.DiscreteActions[1], 
+            actionBuffers.DiscreteActions[1],
             actionBuffers.DiscreteActions[2]);
         ChangeCameraViewPort(actionBuffers.DiscreteActions[3]);
         var resetSignal = actionBuffers.DiscreteActions[4];
+        ManageScreenShots(actionBuffers.DiscreteActions[5]);
+
         if (resetSignal == 1)
         {
             EndEpisode();
@@ -286,18 +284,18 @@ public class AgentSimple : Agent
         driveController = m_chain.DriveControllers[m_chain.handL];
         continuousActions[15] = driveController.ComputeNormalizedDriveTarget(driveController.XParameters, lResponse.JointTargets[3]);
 
-        if(armR != Vector3.zero) positionArmR.localPosition = armR;
-        if(armL != Vector3.zero) positionArmL.localPosition = armL;
+        if (armR != Vector3.zero) positionArmR.localPosition = armR;
+        if (armL != Vector3.zero) positionArmL.localPosition = armL;
 
         angles_R = client.CalculateInverseKinematicsRightAsync(new IKRequest
         {
             Target = PrepareEndEffectorGrpcQuery(positionArmR.position),
-            CurrentJoints = {m_chain.armR_yaw.xDrive.SafeTarget(), m_chain.armR_pitch.xDrive.SafeTarget(), m_chain.forearmR.xDrive.SafeTarget(), m_chain.handR.xDrive.SafeTarget()}
+            CurrentJoints = { m_chain.armR_yaw.xDrive.SafeTarget(), m_chain.armR_pitch.xDrive.SafeTarget(), m_chain.forearmR.xDrive.SafeTarget(), m_chain.handR.xDrive.SafeTarget() }
         }).GetAwaiter();
         angles_L = client.CalculateInverseKinematicsLeftAsync(new IKRequest
         {
             Target = PrepareEndEffectorGrpcQuery(positionArmL.position),
-            CurrentJoints = {m_chain.armL_yaw.xDrive.SafeTarget(), m_chain.armL_pitch.xDrive.SafeTarget(), m_chain.forearmL.xDrive.SafeTarget(), m_chain.handL.xDrive.SafeTarget()}
+            CurrentJoints = { m_chain.armL_yaw.xDrive.SafeTarget(), m_chain.armL_pitch.xDrive.SafeTarget(), m_chain.forearmL.xDrive.SafeTarget(), m_chain.handL.xDrive.SafeTarget() }
         }).GetAwaiter();
 
         if (spineValue != 0.0f && handLValue != 0.0f && handRValue != 0.0f)
@@ -347,81 +345,6 @@ public class AgentSimple : Agent
         m_chain.DriveControllers[m_chain.head].SetDriveTargetsNorm(continuousActions[++i], continuousActions[++i], 0);
     }
 
-    public override void Heuristic(in ActionBuffers actionsOut)
-    {
-        var actions = actionsOut.ContinuousActions;
-        if (Input.GetKey("w"))
-        {
-            actions[0] = 1;
-        }
-        else if (Input.GetKey("s"))
-        {
-            actions[0] = -1;
-        }
-        else
-        {
-            actions[0] = 0;
-        }
-
-        if (Input.GetKey("a"))
-        {
-            actions[1] = -1;
-        }
-        else if (Input.GetKey("d"))
-        {
-            actions[1] = 1;
-        }
-        else
-        {
-            actions[1] = 0;
-        }
-
-        if (Input.GetKey("q"))
-        {
-            actions[2] = -1;
-        }
-        else if (Input.GetKey("e"))
-        {
-            actions[2] = 1;
-        }
-        else
-        {
-            actions[2] = 0;
-        }
-
-        actions[3] = positionArmR.localPosition.x;
-        actions[4] = positionArmR.localPosition.y;
-        actions[5] = positionArmR.localPosition.z;
-        actions[6] = positionArmL.localPosition.x;
-        actions[7] = positionArmL.localPosition.y;
-        actions[8] = positionArmL.localPosition.z;
-
-        var actionsOutDiscreteActions = actionsOut.DiscreteActions;
-        actionsOutDiscreteActions[0] = 1;
-        actionsOutDiscreteActions[2] = Input.GetKey("space") ? 1 : 0;
-
-        if (Input.GetKey(KeyCode.Alpha1))
-        {
-            actionsOutDiscreteActions[1] = 1;
-        }
-
-        if (Input.GetKey(KeyCode.Alpha2))
-        {
-            actionsOutDiscreteActions[1] = 2;
-        }
-
-        if (Input.GetKey(KeyCode.Alpha3))
-        {
-            actionsOutDiscreteActions[1] = 3;
-        }
-
-        if (Input.GetKey(KeyCode.Alpha4))
-        {
-            actionsOutDiscreteActions[1] = 4;
-        }
-    }
-
-
     private Ik.Vector3 PrepareEndEffectorGrpcQuery(Vector3 position)
     {
         var vector3 = new Ik.Vector3();
@@ -430,5 +353,36 @@ public class AgentSimple : Agent
         vector3.Y = baseVec.y;
         vector3.Z = baseVec.z;
         return vector3;
+    }
+
+    private void ManageScreenShots(int signal)
+    {
+        if (lastScreenShot + 1 > Time.time) return;
+
+        if (signal == 1 || signal == 3) TakeScreenShot(eyeCamera);
+        if (signal == 2 || signal == 3) TakeScreenShot(topCamera);
+        lastScreenShot = Time.time;
+    }
+
+    public void TakeScreenShot(Camera camera)
+    {
+        if (camera == null) return;
+        var targetTexture = camera.targetTexture;
+
+        RenderTexture.active = targetTexture;
+        camera.Render();
+
+        Texture2D imageOverview = new Texture2D(targetTexture.width, targetTexture.height, TextureFormat.RGBA64, false);
+        imageOverview.ReadPixels(new Rect(0, 0, targetTexture.width, targetTexture.height), 0, 0);
+        imageOverview.Apply();
+
+        byte[] bytes = imageOverview.EncodeToJPG();
+
+        var filename = camera.transform.name + ".jpg";
+        var path = Application.dataPath + "/Screenshots/" + filename;
+        File.WriteAllBytes(path, bytes);
+        // filename = camera.transform.name + "_" + (int)Time.fixedTime + ".png";
+        // path = Application.dataPath + "/Screenshots/" + filename;
+        // File.WriteAllBytes(path, bytes);
     }
 }
