@@ -55,7 +55,7 @@ class SkillBasedEnv:
         self.plans = PlanModule()
         # self.plans.query("There are some boxes that are away from the agent. I want the yellow box to be moved to the goal!")
         self.plans.query(
-            "There are some boxes that are away from the agent. I want the yellow box to be moved to the goal! After that is done, I also want the red box to be moved to the goal!")
+            "There are some boxes that are away from the agent. I want the yellow box to be moved to the goal! After that is done, I also want the red box to be moved to the goal! Finally, move the blue box to the goal!")
 
         try:
             exe_file = exe_paths[system]

@@ -379,6 +379,7 @@ public class AgentSimple : Agent
         byte[] bytes = imageOverview.EncodeToJPG();
 
         var filename = camera.transform.name + ".jpg";
+        if (!Directory.Exists(Application.dataPath + "/Screenshots/")) Directory.CreateDirectory(Application.dataPath + "/Screenshots/");
         var path = Application.dataPath + "/Screenshots/" + filename;
         File.WriteAllBytes(path, bytes);
         // filename = camera.transform.name + "_" + (int)Time.fixedTime + ".png";
