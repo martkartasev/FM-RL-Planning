@@ -5,6 +5,7 @@ from enum import Enum
 from threading import Thread
 
 import numpy as np
+from PIL import Image
 
 import ik_server
 from plan_llm import PlanModule
@@ -22,6 +23,12 @@ exe_paths = {
     "Darwin": os.path.join(current_path, "builds/mac/build.app/Contents/MacOS/FM-RL-Unity"),
     "Windows": os.path.join(current_path, r"builds\win\FM-RL-Unity.exe"),
     "Linux": os.path.join(current_path, "builds/linux/env.x86_64")
+}
+
+img_paths = {
+    "Darwin": os.path.join(current_path, "builds/mac/build.app/Contents/Screenshots/"),
+    "Windows": os.path.join(current_path, r"builds\win\FM-RL-Unity_Data\Screenshots\\"),
+    "Linux": os.path.join(current_path, "builds/linux/FM-RL-Unity_Data/Screenshots/")
 }
 
 
@@ -120,6 +127,9 @@ class SkillBasedEnv:
         bridge_near_pos = agent_obs[33:36]
         move_to_done = agent_obs[36]
         pick_done = agent_obs[37]
+
+        if os.path.isfile(img_paths[system] + "eyes.png"):
+            eyes_image = Image.open(img_paths[system] + "eyes.png")
 
         self.actions = self.parse_plan()
 

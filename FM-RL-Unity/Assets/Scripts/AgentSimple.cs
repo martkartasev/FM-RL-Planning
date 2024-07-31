@@ -376,9 +376,9 @@ public class AgentSimple : Agent
         imageOverview.ReadPixels(new Rect(0, 0, targetTexture.width, targetTexture.height), 0, 0);
         imageOverview.Apply();
 
-        byte[] bytes = imageOverview.EncodeToJPG();
+        byte[] bytes = imageOverview.EncodeToPNG();
 
-        var filename = camera.transform.name + ".jpg";
+        var filename = camera.transform.name + ".png";
         if (!Directory.Exists(Application.dataPath + "/Screenshots/")) Directory.CreateDirectory(Application.dataPath + "/Screenshots/");
         var path = Application.dataPath + "/Screenshots/" + filename;
         File.WriteAllBytes(path, bytes);
