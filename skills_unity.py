@@ -7,7 +7,7 @@ from threading import Thread
 import numpy as np
 
 import ik_server
-from basic_llm import PlanModule
+from plan_llm import PlanModule
 from mlagents_envs.base_env import ActionTuple
 from mlagents_envs.environment import UnityEnvironment
 from mlagents_envs.side_channel.engine_configuration_channel import EngineConfigurationChannel
@@ -26,15 +26,17 @@ exe_paths = {
 
 
 class Position(Enum):
-    ForceStop = 9
-    RampTopR = 8
-    RampBottomR = 7
-    RampTopL = 6
-    RampBottomL = 5
-    BridgeFar = 4
-    BridgeNear = 3
-    Goal = 2
-    Box = 1
+    ForceStop = 50
+    RampTopR = 10
+    RampBottomR = 9
+    RampTopL = 8
+    RampBottomL = 7
+    BridgeFar = 6
+    BridgeNear = 5
+    RedBox = 4
+    BlueBox = 3
+    YellowBox = 2
+    Goal = 1
     NoTarget = 0
 
 
@@ -51,7 +53,8 @@ class SkillBasedEnv:
         self.ikserver.start()
 
         self.plans = PlanModule()
-        self.plans.query("There is a box thats away from the agent. I want the box to be moved to the goal!")
+        # self.plans.query("There are some boxes that are away from the agent. I want the yellow box to be moved to the goal!")
+        self.plans.query("There are some boxes that are away from the agent. I want the yellow box to be moved to the goal! After that is done, I also want the red box to be moved to the goal!")
 
         try:
             exe_file = exe_paths[system]
@@ -102,18 +105,20 @@ class SkillBasedEnv:
 
     def produce_discrete_action(self, agent_obs):
         # All obs relative to agent
-        box_pos = agent_obs[0:3]
+        goal_pos = agent_obs[0:3]
         hand_l_pos = agent_obs[3:6]
         hand_r_pos = agent_obs[6:9]
-        goal_pos = agent_obs[9:12]
-        ramp_l_bottom_pos = agent_obs[12:15]
-        ramp_l_top_pos = agent_obs[15:18]
-        ramp_r_bottom_pos = agent_obs[18:21]
-        ramp_r_top_pos = agent_obs[21:24]
-        bridge_far_pos = agent_obs[24:27]
-        bridge_near_pos = agent_obs[27:30]
-        move_to_done = agent_obs[30]
-        pick_done = agent_obs[31]
+        box_red_pos = agent_obs[9:12]
+        box_yellow_pos = agent_obs[12:15]
+        box_blue_pos = agent_obs[15:18]
+        ramp_l_bottom_pos = agent_obs[18:21]
+        ramp_l_top_pos = agent_obs[21:24]
+        ramp_r_bottom_pos = agent_obs[24:27]
+        ramp_r_top_pos = agent_obs[27:30]
+        bridge_far_pos = agent_obs[30:33]
+        bridge_near_pos = agent_obs[33:36]
+        move_to_done = agent_obs[36]
+        pick_done = agent_obs[37]
 
         self.actions = self.parse_plan()
 
@@ -141,8 +146,12 @@ class SkillBasedEnv:
     def parse_action(self, actions):
         if len(actions) > 0:
             (skill, target) = actions.pop(0)
-            if "box" in target:
-                target = Position.Box
+            if "blue box" in target:
+                target = Position.BlueBox
+            elif "yellow box" in target:
+                target = Position.YellowBox
+            elif "red box" in target:
+                target = Position.RedBox
             elif "goal" in target:
                 target = Position.Goal
             return skill, target

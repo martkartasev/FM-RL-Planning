@@ -12,8 +12,10 @@ using Vector3 = UnityEngine.Vector3;
 
 public class AgentSimple : Agent
 {
-    [Header("Target")] public Transform target; //Target the agent will try to grasp.
-    [Header("Target Position")] public Transform targetPosition;
+    [Header("Goal")] public Transform goal;
+    [Header("Target Position")] public Transform targetRedPosition;
+    public Transform targetYellowPosition;
+    public Transform targetBluePosition;
 
     [FormerlySerializedAs("targetPositionL")]
     public Transform positionArmL;
@@ -82,49 +84,21 @@ public class AgentSimple : Agent
             CurrentJoints = {m_chain.armL_yaw.xDrive.target, m_chain.armL_pitch.xDrive.target, m_chain.forearmL.xDrive.target, m_chain.handL.xDrive.target}
         }).GetAwaiter();
     }
-
-
-    /// <summary>
-    /// Loop over body parts and reset them to initial conditions.
-    /// </summary>
+    
     public override void OnEpisodeBegin()
     {
         m_chain.Restart(m_chain.hips.transform.parent.TransformPoint(new Vector3(0, 0.1f, 0)), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
-
-        // target.GetComponent<TargetPositionRandomizer>().RandomizeWithRespectTo(m_chain.hips.transform);
-    }
-
-    /// <summary>
-    /// Add relevant information on each body part to observations.
-    /// </summary>
-    public void CollectObservationBodyPart(ArticulationBody bp, VectorSensor sensor)
-    {
-        //GROUND CHECK
-        sensor.AddObservation(bp.GetComponent<GroundContact>().touchingGround); // Is this bp touching the ground
-
-        //Get velocities in the context of our orientation cube's space
-        //Note: You can get these velocities in world space as well but it may not train as well.
-        var hips = m_chain.root;
-        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.velocity));
-        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.angularVelocity));
-
-        //Get position relative to hips in the context of our orientation cube's space
-        sensor.AddObservation(hips.transform.InverseTransformDirection(bp.transform.position - hips.transform.position));
-
-        if (bp != hips)
-        {
-            sensor.AddObservation(bp.transform.localRotation);
-            //sensor.AddObservation(bp.currentStrength / m_JdController.maxJointForceLimit);
-        }
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(m_chain.chest.transform.InverseTransformPoint(target.transform.position));
+        sensor.AddObservation(m_chain.chest.transform.InverseTransformPoint(goal.transform.position));
         sensor.AddObservation(m_chain.chest.transform.InverseTransformPoint(positionArmL.transform.position));
         sensor.AddObservation(m_chain.chest.transform.InverseTransformPoint(positionArmR.transform.position));
 
-        sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(targetPosition.transform.position));
+        sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(targetRedPosition.position));
+        sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(targetYellowPosition.position));
+        sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(targetBluePosition.position));
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionRampBottomL.transform.position));
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionRampTopL.transform.position));
         sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionRampBottomR.transform.position));
@@ -221,12 +195,12 @@ public class AgentSimple : Agent
     private void PickSkillControl(int targetObject)
     {
         var targetTransform = IdentifierToTransform(targetObject);
-        if (targetObject != 9 && targetTransform != null)
+        if (targetObject != 50 && targetTransform != null)
         {
             if (!pickSkill.enabled) pickSkill.enabled = enabled;
             pickSkill.target = targetTransform;
         }
-        else if (targetObject == 9)
+        else if (targetObject == 50)
         {
             pickSkill.enabled = false;
         }
@@ -236,14 +210,16 @@ public class AgentSimple : Agent
     {
         return targetObject switch
         {
-            8 => positionRampTopR,
-            7 => positionRampBottomR,
-            6 => positionRampTopL,
-            5 => positionRampBottomL,
-            4 => positionBridgeFar,
-            3 => positionBridgeNear,
-            2 => targetPosition,
-            1 => target,
+            10 => positionRampTopR,
+            9 => positionRampBottomR,
+            8 => positionRampTopL,
+            7 => positionRampBottomL,
+            6 => positionBridgeFar,
+            5 => positionBridgeNear,
+            4 => targetRedPosition,
+            3 => targetBluePosition,
+            2 => targetYellowPosition,
+            1 => goal,
             _ => null
         };
     }
