@@ -9,6 +9,7 @@ using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 using Vector3 = UnityEngine.Vector3;
 
 public class AgentSimple : Agent
@@ -30,6 +31,9 @@ public class AgentSimple : Agent
     public Transform positionRampBottomL;
     public Transform positionBridgeNear;
     public Transform positionBridgeFar;
+
+    public Transform positionButton;
+    public Transform positionGate;
 
     public ArticulationChainComponent m_chain;
 
@@ -60,6 +64,7 @@ public class AgentSimple : Agent
 
     public MoveToSkill moveToSkill;
     public PickSkill pickSkill;
+    public PushSkill pushSkill;
 
     public float spineValue;
     public float handLValue;
@@ -94,7 +99,7 @@ public class AgentSimple : Agent
 
     public override void OnEpisodeBegin()
     {
-        m_chain.Restart(m_chain.hips.transform.parent.TransformPoint(new Vector3(0, 0.1f, 0)), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
+      //  m_chain.Restart(m_chain.hips.transform.parent.TransformPoint(new Vector3(0, 0.1f, 0)), Quaternion.Euler(transform.parent.TransformDirection(Vector3.zero)));
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -145,9 +150,11 @@ public class AgentSimple : Agent
     {
         var continuousActions = actionBuffers.ContinuousActions;
 
-        ExecuteBehavior(continuousActions, actionBuffers.DiscreteActions[0],
+        ExecuteBehavior(continuousActions, 
+            actionBuffers.DiscreteActions[0],
             actionBuffers.DiscreteActions[1],
-            actionBuffers.DiscreteActions[2]);
+            actionBuffers.DiscreteActions[2],
+            actionBuffers.DiscreteActions[6]);
         ChangeCameraViewPort(actionBuffers.DiscreteActions[3]);
         var resetSignal = actionBuffers.DiscreteActions[4];
         ManageScreenShots(actionBuffers.DiscreteActions[5]);
@@ -158,13 +165,14 @@ public class AgentSimple : Agent
         }
     }
 
-    private void ExecuteBehavior(ActionSegment<float> continuousActions, int behaviorType, int moveToTarget, int pickTarget)
+    private void ExecuteBehavior(ActionSegment<float> continuousActions, int behaviorType, int moveToTarget, int pickTarget, int pushTarget)
     {
         switch (behaviorType)
         {
             case 2:
                 MoveToSkillControl(moveToTarget);
                 PickSkillControl(pickTarget);
+                PushSkillControl(pushTarget);
                 SimplifiedControl(continuousActions);
                 break;
             case 1:
@@ -173,6 +181,20 @@ public class AgentSimple : Agent
             case 0:
                 LowLevelControl(continuousActions);
                 break;
+        }
+    }
+
+    private void PushSkillControl(int pushTarget)
+    {
+        var targetTransform = IdentifierToTransform(pushTarget);
+        if (pushTarget != 50 && targetTransform != null)
+        {
+            if (!pushSkill.enabled) pushSkill.enabled = enabled;
+            pushSkill.target = targetTransform;
+        }
+        else if (pushTarget == 50)
+        {
+            pushSkill.enabled = false;
         }
     }
 
@@ -208,6 +230,8 @@ public class AgentSimple : Agent
     {
         return targetObject switch
         {
+            12 => positionGate,
+            11 => positionButton,
             10 => positionRampTopR,
             9 => positionRampBottomR,
             8 => positionRampTopL,
@@ -306,6 +330,13 @@ public class AgentSimple : Agent
         }
 
         LowLevelControl(continuousActions);
+    }
+
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var discreteActions = actionsOut.DiscreteActions;
+        discreteActions[0] = 2;
+        base.Heuristic(in actionsOut);
     }
 
     private void LowLevelControl(ActionSegment<float> continuousActions)
