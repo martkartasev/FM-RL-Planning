@@ -16,14 +16,14 @@ class PlanModule:
         }
 
         self.messages = [
-            {"role": "system", "content": "You are an AI agent that can move around on wheels and has two arms. You can use the skills Release, Grasp, Move To, Recharge! "
+            {"role": "system", "content": "You are an AI agent that can move around on wheels and has two arms. You can use the skills Release, Grasp, Move To, Push. "
                                           "The Grasp skill can only be used if you are near the target first. "
-                                          "There are the following objects, a red box, a blue box, a yellow box and a white goal square! "
+                                          "There are the following objects, a red box, a blue box, a yellow box and a white goal square. "
                                           "By default assume you do not have the box and are not close to it."
-                                          "A target should either be one an objects or a position! Avoid using prepositions for targets! "
-                                          "Not all skills need to be used. Provide a sequential plan of skill target pairs! "
-                                          "Give answers as a list of comma separated values (CSV)! "
-                                          "There should be two columns: action and target!"
+                                          "A target should either be one an objects or a position! Avoid using prepositions for targets. "
+                                          "Not all skills need to be used. Provide a sequential plan of skill target pairs. "
+                                          "Give answers as a list of comma separated values (CSV). "
+                                          "There should be two columns: action and target. Do not include quotation marks."
                                        },
         ]
         self.output = ""

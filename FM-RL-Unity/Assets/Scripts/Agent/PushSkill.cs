@@ -12,6 +12,7 @@ namespace Agent
         private int counter = 0;
         private int stepLength;
         private Vector3 initialPosition;
+        public bool done = false;
 
         private void Start()
         {
@@ -26,6 +27,7 @@ namespace Agent
             agent.handRValue = 0f;
             initialPosition = target.position;
             counter = 0;
+            done = false;
         }
 
         private void FixedUpdate()
@@ -45,6 +47,11 @@ namespace Agent
             {
                 agent.spineValue = 0.5f;
                 rightArm.localPosition = chestTransform.InverseTransformPoint(initialPosition);
+            }
+
+            if (counter > stepLength * 2 && counter < stepLength * 3)
+            {
+                done = true;
             }
         }
 

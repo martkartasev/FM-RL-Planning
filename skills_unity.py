@@ -34,12 +34,15 @@ img_paths = {
 
 class Position(Enum):
     ForceStop = 50
+    BridgeCenter = 13
+    Door = 12
+    Button = 11
     RampTopR = 10
     RampBottomR = 9
     RampTopL = 8
     RampBottomL = 7
-    BridgeFar = 6
-    BridgeNear = 5
+    BridgeGoal = 6
+    BridgeStart = 5
     RedBox = 4
     BlueBox = 3
     YellowBox = 2
@@ -61,8 +64,7 @@ class SkillBasedEnv:
 
         self.plans = PlanModule()
         # self.plans.query("There are some boxes that are away from the agent. I want the yellow box to be moved to the goal!")
-        self.plans.query(
-            "There are some boxes that are away from the agent. I want the yellow box to be moved to the goal! After that is done, I also want the red box to be moved to the goal! Finally, move the blue box to the goal!")
+        self.plans.query("Move to the button and push the button")
 
         try:
             exe_file = exe_paths[system]
@@ -91,6 +93,7 @@ class SkillBasedEnv:
 
         self.move_target = Position.NoTarget
         self.pick_target = Position.NoTarget
+        self.push_target = Position.NoTarget
 
     def run_env(self, ):
         behavior_name = "Lifter?team=0"
@@ -127,14 +130,22 @@ class SkillBasedEnv:
         bridge_near_pos = agent_obs[33:36]
         move_to_done = agent_obs[36]
         pick_done = agent_obs[37]
+        bridge_center_pos = agent_obs[38:41]
+        button_pos = agent_obs[41:44]
+        door_pos = agent_obs[44:47]
+        door_open = agent_obs[47]
+        push_done = agent_obs[48]
 
-        if os.path.isfile(img_paths[system] + "eyes.png"):
-            eyes_image = Image.open(img_paths[system] + "eyes.png")
+        if os.path.isfile(img_paths[system] + "Eyes.png"):  # This reads the agents eye output. Only tested on windows.
+            eyes_image = Image.open(img_paths[system] + "Eyes.png")
+        if os.path.isfile(img_paths[system] + "MapCamera.png"):  # This reads the map output. Only tested on windows.
+            eyes_image = Image.open(img_paths[system] + "MapCamera.png")
 
         self.actions = self.parse_plan()
 
         current_action_done = move_to_done if self.current_action == "Move To" else (
-            pick_done if self.current_action == "Grasp" else 1)
+            pick_done if self.current_action == "Grasp" else
+            push_done if self.current_action == "Push" else 1)
 
         if current_action_done:
             if self.current_action == "Move To":
@@ -146,19 +157,34 @@ class SkillBasedEnv:
 
         if self.current_action == "Grasp":
             self.pick_target = self.current_target
+            self.push_target = Position.ForceStop
 
         if self.current_action == "Release":
+            self.pick_target = Position.ForceStop
+            self.push_target = Position.ForceStop
+
+        if self.current_action == "Push":
+            self.push_target = self.current_target
             self.pick_target = Position.ForceStop
 
         agent_module = Module.SkillBasedControl.value
         camera = 1  # 0 - no change, 1 - Isometric, 2 - Third person behind, 3 - Third Person front
         reset_agent = 0
         screenshot = 3  # 0 - no screenshot saved, 1 - eyes only, 2 - map only, 3 - both
-        return [agent_module, self.move_target.value, self.pick_target.value, camera, reset_agent, screenshot]
+        return [agent_module,
+                self.move_target.value,
+                self.pick_target.value,
+                camera, reset_agent, screenshot,
+                self.push_target.value]
 
     def parse_action(self, actions):
         if len(actions) > 0:
-            (skill, target) = actions.pop(0)
+            pop = actions.pop(0)
+            while len(pop) != 2 and len(actions) > 0:
+                print("Unexpected action result: " + str(pop))
+                pop = actions.pop(0)
+
+            (skill, target) = pop
             if "blue box" in target:
                 target = Position.BlueBox
             elif "yellow box" in target:
@@ -167,6 +193,16 @@ class SkillBasedEnv:
                 target = Position.RedBox
             elif "goal" in target:
                 target = Position.Goal
+            elif "button" in target:
+                target = Position.Button
+            elif "bridge start" in target:
+                target = Position.BridgeStart
+            elif "bridge goal" in target:
+                target = Position.BridgeGoal
+            elif "bridge center" in target:
+                target = Position.BridgeCenter
+            elif "door" in target:
+                target = Position.Door
             return skill, target
         return "", Position.ForceStop
 

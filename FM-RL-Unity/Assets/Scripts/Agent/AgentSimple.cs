@@ -128,6 +128,7 @@ namespace Agent
             sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionButton.transform.position));
             sensor.AddObservation(m_chain.hips.transform.InverseTransformPoint(positionGate.transform.position));
             sensor.AddObservation(doorToggle.triggered ? 1 : 0);
+            sensor.AddObservation(pushSkill.done ? 1 : 0);
         }
 
         private void ChangeCameraViewPort(int viewPort)
@@ -178,7 +179,7 @@ namespace Agent
             switch (behaviorType)
             {
                 case 2:
-                    //  MoveToSkillControl(moveToTarget);
+                    MoveToSkillControl(moveToTarget);
                     PickSkillControl(pickTarget);
                     PushSkillControl(pushTarget);
                     SimplifiedControl(continuousActions);
