@@ -40,7 +40,6 @@ namespace Scripts.Game
             {
                 followObject.target_object = vehicleInstance.transform;
                 followObject.CameraFixed = vehicleInstance.name.ToLower().Contains("drone");
-                followObject.Start();
             }
         }
     }
