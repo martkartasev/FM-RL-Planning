@@ -184,6 +184,9 @@ class SkillBasedEnv:
                 print("Unexpected action result: " + str(pop))
                 pop = actions.pop(0)
 
+            if len(pop) != 2:
+                return "", Position.ForceStop
+
             (skill, target) = pop
             if "blue box" in target:
                 target = Position.BlueBox
