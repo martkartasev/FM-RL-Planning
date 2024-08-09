@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using DefaultNamespace;
@@ -418,10 +419,12 @@ namespace Agent
 
             byte[] bytes = imageOverview.EncodeToPNG();
 
-            var filename = camera.transform.name + ".png";
             if (!Directory.Exists(Application.dataPath + "/Screenshots/")) Directory.CreateDirectory(Application.dataPath + "/Screenshots/");
-            var path = Application.dataPath + "/Screenshots/" + filename;
-            File.WriteAllBytes(path, bytes);
+            var path = Application.dataPath + "/Screenshots/" + camera.transform.name;
+            File.WriteAllBytes(path + "_new.png", bytes);
+            File.Copy(path + "_new.png", path + ".png", true);
+
+
             // filename = camera.transform.name + "_" + (int)Time.fixedTime + ".png";
             // path = Application.dataPath + "/Screenshots/" + filename;
             // File.WriteAllBytes(path, bytes);
