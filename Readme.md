@@ -66,3 +66,29 @@ chmod -R 777 FM-RL-Unity
  python -m grpc_tools.protoc -I./ --python_out=./ --pyi_out=./ --grpc_python_out=./ ./ik.proto
  protoc -I ./ --csharp_out=./ --grpc_csharp_out=./ ./ik.proto
 ```
+
+
+
+
+
+# To start experiments
+To start the experiments you need to start three different programs: The web server, the plan parser, and the unity environment
+### Start web server
+```bash
+sh init_webserver.sh
+```
+When prompted select the GPU architecture of your device. When done setting up, navigate to [localhost:7860](localhost:7860).
+
+In the web interface navigate to the model tab and download the LLM of your choosing. We recommend using the Phi-3 model family. Choose the chat setting and not the default chat-instruct setting for the agent to get the most consistent behavior.
+
+### Start plan parser
+```bash
+python parse_conversation.py
+```
+
+### Start unity environment
+```bash
+python skills_unity_new.py
+```
+
+If all things are running, a unity environment should pop up and you should communicate with the planning assistant in the web interface. Once you have confirmed a plan by writing "Execute plan!", the agent should start moving once a plan has been generated.

@@ -26,6 +26,7 @@ execute_for_os() {
         Linux)
             echo "Running script for Linux..."
             bash "$SUBMODULE_PATH/start_linux.sh"
+            chmod +x -R ./*
             ;;
         Mac)
             echo "Running script for Mac..."
@@ -50,11 +51,12 @@ execute_for_os() {
                 1)
                     echo "Running script for Linux..."
                     bash "$SUBMODULE_PATH/start_linux.sh"
+                    chmod +x -R ./*
                     ;;
                 2)
                     echo "Running script for Mac..."
                     bash "$SUBMODULE_PATH/start_macos.sh"
-		    chmod -R 755 ./builds/mac/build.app/Contents/MacOS/FM-RL-Unity
+		            chmod -R 755 ./builds/mac/build.app/Contents/MacOS/FM-RL-Unity
                     ;;
                 *)
                     echo "Invalid choice. Exiting."
@@ -64,25 +66,6 @@ execute_for_os() {
             ;;
     esac
 }
-
-
-# Clone the main repository
-git clone "$MAIN_REPO_URL" "$MAIN_REPO_DIR"
-
-# Change directory to the main repository
-cd "$MAIN_REPO_DIR" || exit
-
-# Initialize and update the submodules recursively
-git submodule update --init --recursive
-
-# Change directory to the submodule
-cd "$SUBMODULE_PATH" || exit
-
-# Pull the latest changes from the submodule
-git pull origin master
-
-# Change back to the main repository directory
-cd ..
 
 # Copy the file from the main repo to the destination folder inside the submodule
 cp "$FILE_TO_COPY" "$SUBMODULE_PATH/$DESTINATION_FOLDER/"
