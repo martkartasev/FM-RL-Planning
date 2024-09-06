@@ -8,10 +8,12 @@ import numpy as np
 from PIL import Image
 
 import ik_server
-from plan_llm import PlanModule
+from plan_llm import PlanModule, MultiModalPlanModule
 from mlagents_envs.base_env import ActionTuple
 from mlagents_envs.environment import UnityEnvironment
-from mlagents_envs.side_channel.engine_configuration_channel import EngineConfigurationChannel
+from mlagents_envs.side_channel.engine_configuration_channel import (
+    EngineConfigurationChannel,
+)
 
 # Get the current working directory
 current_path = os.getcwd()
@@ -20,15 +22,17 @@ system = platform.system()
 
 # Dictionary mapping operating systems to their respective executable paths
 exe_paths = {
-    "Darwin": os.path.join(current_path, "builds/mac/build.app/Contents/MacOS/FM-RL-Unity"),
+    "Darwin": os.path.join(
+        current_path, "builds/mac/build.app/Contents/MacOS/FM-RL-Unity"
+    ),
     "Windows": os.path.join(current_path, r"builds\win\FM-RL-Unity.exe"),
-    "Linux": os.path.join(current_path, "builds/linux/env.x86_64")
+    "Linux": os.path.join(current_path, "builds/linux/env.x86_64"),
 }
 
 img_paths = {
     "Darwin": os.path.join(current_path, "builds/mac/build.app/Contents/Screenshots/"),
     "Windows": os.path.join(current_path, r"builds\win\FM-RL-Unity_Data\Screenshots\\"),
-    "Linux": os.path.join(current_path, "builds/linux/FM-RL-Unity_Data/Screenshots/")
+    "Linux": os.path.join(current_path, "builds/linux/FM-RL-Unity_Data/Screenshots/"),
 }
 
 
@@ -62,7 +66,13 @@ class SkillBasedEnv:
         self.ikserver = Thread(target=ik_server.serve)
         self.ikserver.start()
 
-        self.plans = PlanModule()
+        # self.plans = PlanModule()
+        image_paths = dict(
+            eyes=img_paths[system] + "Eyes.png",
+            map=img_paths[system] + "MapCamera.png",
+        )
+        self.plans = MultiModalPlanModule(image_paths)
+
         # self.plans.query("There are some boxes that are away from the agent. I want the yellow box to be moved to the goal!")
         self.plans.query("Move to the button and push the button")
 
@@ -74,8 +84,9 @@ class SkillBasedEnv:
         print(f"Executable path: {exe_file}")
 
         engine = EngineConfigurationChannel()
-        engine.set_configuration_parameters(time_scale=1, width=800,
-                                            height=600)  # Can speed up simulation between steps with this
+        engine.set_configuration_parameters(
+            time_scale=1, width=800, height=600
+        )  # Can speed up simulation between steps with this
         engine.set_configuration_parameters(quality_level=0)
 
         print("Trying to connect to Unity Environment!")
@@ -83,7 +94,8 @@ class SkillBasedEnv:
             file_name=exe_file,
             no_graphics=False,  # Can disable graphics if needed
             base_port=10030,  # for starting multiple envs
-            side_channels=[engine])
+            side_channels=[engine],
+        )
         print("Unity Environment connected!")
         self.env.reset()
 
@@ -95,7 +107,9 @@ class SkillBasedEnv:
         self.pick_target = Position.NoTarget
         self.push_target = Position.NoTarget
 
-    def run_env(self, ):
+    def run_env(
+        self,
+    ):
         behavior_name = "Lifter?team=0"
 
         for i in range(1000000):
@@ -104,7 +118,12 @@ class SkillBasedEnv:
             action_tuple = ActionTuple()
             if nr_agents > 0:
                 observations = decision_steps.obs[0]
-                discrete = np.array([self.produce_discrete_action(observations[i][:]) for i in range(nr_agents)])
+                discrete = np.array(
+                    [
+                        self.produce_discrete_action(observations[i][:])
+                        for i in range(nr_agents)
+                    ]
+                )
                 action_tuple.add_discrete(discrete)
                 action_tuple.add_continuous(np.zeros((nr_agents, 24)))
             else:
@@ -136,34 +155,35 @@ class SkillBasedEnv:
         door_open = agent_obs[47]
         push_done = agent_obs[48]
 
-        if os.path.isfile(img_paths[system] + "Eyes.png"):  # This reads the agents eye output. Only tested on windows.
-            eyes_image = Image.open(img_paths[system] + "Eyes.png")
-        if os.path.isfile(img_paths[system] + "MapCamera.png"):  # This reads the map output. Only tested on windows.
-            eyes_image = Image.open(img_paths[system] + "MapCamera.png")
-
         self.actions = self.parse_plan()
 
-        current_action_done = move_to_done if self.current_action == "Move To" else (
-            pick_done if self.current_action == "Grasp" else
-            push_done if self.current_action == "Push" else 1)
+        current_action_done = (
+            move_to_done
+            if "move to" in self.current_action.lower()
+            else (
+                pick_done
+                if "grasp" in self.current_action.lower()
+                else push_done if "push" in self.current_action.lower() else 1
+            )
+        )
 
         if current_action_done:
-            if self.current_action == "Move To":
+            if "move to" in self.current_action.lower():
                 self.move_target = Position.NoTarget
             (self.current_action, self.current_target) = self.parse_action(self.actions)
 
-        if self.current_action == "Move To":
+        if "move to" in self.current_action.lower():
             self.move_target = self.current_target
 
-        if self.current_action == "Grasp":
+        if "grasp" in self.current_action.lower():
             self.pick_target = self.current_target
             self.push_target = Position.ForceStop
 
-        if self.current_action == "Release":
+        if "release" in self.current_action.lower():
             self.pick_target = Position.ForceStop
             self.push_target = Position.ForceStop
 
-        if self.current_action == "Push":
+        if "push" in self.current_action.lower():
             self.push_target = self.current_target
             self.pick_target = Position.ForceStop
 
@@ -171,11 +191,15 @@ class SkillBasedEnv:
         camera = 1  # 0 - no change, 1 - Isometric, 2 - Third person behind, 3 - Third Person front
         reset_agent = 0
         screenshot = 3  # 0 - no screenshot saved, 1 - eyes only, 2 - map only, 3 - both
-        return [agent_module,
-                self.move_target.value,
-                self.pick_target.value,
-                camera, reset_agent, screenshot,
-                self.push_target.value]
+        return [
+            agent_module,
+            self.move_target.value,
+            self.pick_target.value,
+            camera,
+            reset_agent,
+            screenshot,
+            self.push_target.value,
+        ]
 
     def parse_action(self, actions):
         if len(actions) > 0:
@@ -211,10 +235,10 @@ class SkillBasedEnv:
 
     def parse_plan(self):
         if self.plans.output != "":
+            print("\n", self.plans.output, "\n")
             lines = self.plans.output.splitlines()
             reader = csv.reader(lines)
             actions = list(reader)
-
             if actions[0][0].strip() == "skill" or actions[0][0].strip() == "action":
                 actions.pop(0)
             print(actions)
@@ -223,6 +247,6 @@ class SkillBasedEnv:
         return self.actions
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     env = SkillBasedEnv()
     env.run_env()
