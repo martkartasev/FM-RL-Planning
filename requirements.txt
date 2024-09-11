@@ -1,8 +1,9 @@
 torch~=2.2.1 --index-url https://download.pytorch.org/whl/cu121
 -e ./ml-agents/ml-agents-envs
 -e ./ml-agents/ml-agents
-transformers==4.41.2
+transformers==4.44.2
 accelerate==0.31.0
 bitsandbytes==0.43.1
 pynput==1.7.7
 grpcio-tools==1.48.2
+ikpy==3.4.1

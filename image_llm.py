@@ -46,7 +46,6 @@ prompt = [
 
 inputs = processor(
     text=prompt,
-    images=[scene_image],
     images=[
         box_image,
         bridge_image,
